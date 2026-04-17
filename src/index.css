@@ -1,0 +1,50 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=DM+Mono:wght@400;500&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "DM Sans", -apple-system, sans-serif;
+  --font-mono: "DM Mono", "Consolas", "Courier New", monospace;
+  
+  --color-bg-main: #0D1117;
+  --color-bg-card: #161B22;
+  --color-bg-input: #21262D;
+  --color-border-color: #30363D;
+  --color-text-primary: #E6EDF3;
+  --color-text-muted: #8B949E;
+  --color-green: #3FB950;
+  --color-amber: #D29922;
+  --color-blue: #58A6FF;
+  --color-red: #F85149;
+  
+  --shadow-green-glow: 0 0 24px rgba(63, 185, 80, 0.25);
+  --shadow-blue-glow: 0 0 24px rgba(88, 166, 255, 0.25);
+}
+
+@layer base {
+  body {
+    @apply bg-bg-main text-text-primary font-sans antialiased overflow-hidden;
+    height: 100vh;
+    width: 100vw;
+  }
+}
+
+/* Scrollbar styling for Fintech theme */
+::-webkit-scrollbar {
+  width: 4px;
+}
+::-webkit-scrollbar-track {
+  background: #0D1117;
+}
+::-webkit-scrollbar-thumb {
+  background: #30363D;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #3FB950;
+}
+
+/* Utility for grid lines */
+.grid-line-r { border-right: 1px solid var(--color-border-color); }
+.grid-line-b { border-bottom: 1px solid var(--color-border-color); }
+.grid-line-l { border-left: 1px solid var(--color-border-color); }
+.grid-line-t { border-top: 1px solid var(--color-border-color); }
+
