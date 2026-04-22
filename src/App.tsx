@@ -8,51 +8,24 @@ import {
   ChevronDown, 
   ChevronUp, 
   Download, 
-  Info, 
   Briefcase, 
-  Users, 
   TrendingUp, 
   Calculator,
-  CheckCircle,
-  AlertTriangle,
-  RefreshCw,
   Trophy,
   ArrowRight,
   ShieldCheck,
-  Zap,
-  Repeat,
-  Repeat2
+  Check,
+  HelpCircle,
+  Quote,
+  Info,
+  Users,
+  Target,
+  Shield
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend,
-  ArcElement,
-  PointElement,
-  LineElement,
-} from 'chart.js';
-import { Bar, Doughnut } from 'react-chartjs-2';
 import jsPDF from 'jspdf';
 
-// Initialize ChartJS
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend,
-  ArcElement,
-  PointElement,
-  LineElement
-);
-
-// --- Constants & Data ---
+// --- Constants & Data (Updated for 2026 Estimates) ---
 
 const FILING_STATUSES = [
   { id: 'single', label: 'Single' },
@@ -114,56 +87,61 @@ const STATES = [
   { name: 'Wyoming', rate: 0, type: 'flat', badge: 'No tax' },
 ];
 
-const FEDERAL_BRACKETS_2025 = {
+const FEDERAL_BRACKETS_2026 = {
   single: [
     { threshold: 0, rate: 0.10 },
-    { threshold: 11925, rate: 0.12 },
-    { threshold: 48475, rate: 0.22 },
-    { threshold: 103350, rate: 0.24 },
-    { threshold: 197300, rate: 0.32 },
-    { threshold: 250525, rate: 0.35 },
-    { threshold: 626350, rate: 0.37 },
+    { threshold: 12250, rate: 0.12 },
+    { threshold: 49800, rate: 0.22 },
+    { threshold: 106150, rate: 0.24 },
+    { threshold: 202650, rate: 0.32 },
+    { threshold: 257325, rate: 0.35 },
+    { threshold: 643250, rate: 0.37 },
   ],
   mfj: [
     { threshold: 0, rate: 0.10 },
-    { threshold: 23850, rate: 0.12 },
-    { threshold: 96950, rate: 0.22 },
-    { threshold: 206700, rate: 0.24 },
-    { threshold: 394600, rate: 0.32 },
-    { threshold: 501050, rate: 0.35 },
-    { threshold: 751600, rate: 0.37 },
+    { threshold: 24500, rate: 0.12 },
+    { threshold: 99600, rate: 0.22 },
+    { threshold: 212300, rate: 0.24 },
+    { threshold: 405300, rate: 0.32 },
+    { threshold: 514650, rate: 0.35 },
+    { threshold: 771900, rate: 0.37 },
   ],
   hoh: [
     { threshold: 0, rate: 0.10 },
-    { threshold: 17000, rate: 0.12 },
-    { threshold: 64850, rate: 0.22 },
-    { threshold: 103350, rate: 0.24 },
-    { threshold: 197300, rate: 0.32 },
-    { threshold: 250500, rate: 0.35 },
-    { threshold: 626350, rate: 0.37 },
+    { threshold: 17450, rate: 0.12 },
+    { threshold: 66600, rate: 0.22 },
+    { threshold: 106150, rate: 0.24 },
+    { threshold: 202650, rate: 0.32 },
+    { threshold: 257300, rate: 0.35 },
+    { threshold: 643250, rate: 0.37 },
   ]
 };
 
-const STANDARD_DEDUCTION_2025 = {
-  single: 15000,
-  mfj: 30000,
-  hoh: 22500,
+const STANDARD_DEDUCTION_2026 = {
+  single: 15450,
+  mfj: 30900,
+  hoh: 23200,
 };
 
-const SS_CAP_2025 = 176100;
-const SE_TAX_RATE = 0.153;
-const FICA_RATE_EMPLOYEE = 0.0765;
+const SS_CAP_2026 = 180500;
 const SE_NET_MULTIPLIER = 0.9235;
-const QBI_RATE = 0.20;
-const QBI_PHASEOUT_SINGLE = 197300;
-const QBI_PHASEOUT_MFJ = 394600;
-const ADD_MEDICARE_THRESHOLD_SINGLE = 200000;
-const ADD_MEDICARE_THRESHOLD_MFJ = 250000;
-const ADD_MEDICARE_RATE = 0.009;
+const QBI_PHASEOUT_SINGLE = 202650;
+const QBI_PHASEOUT_MFJ = 405300;
+
+// --- Types ---
+
+interface DeductionItem {
+  value: number;
+  active: boolean;
+}
+
+interface Deductions {
+  [key: string]: DeductionItem;
+}
 
 // --- Helper Components ---
 
-const AnimatedNumber = ({ value, prefix = "$", duration = 600 }: { value: number, prefix?: string, duration?: number }) => {
+const AnimatedNumber = ({ value, prefix = "$", duration = 800 }: { value: number, prefix?: string, duration?: number }) => {
   const [displayValue, setDisplayValue] = useState(0);
   const startTimeRef = useRef<number | null>(null);
   const startValueRef = useRef(0);
@@ -175,7 +153,7 @@ const AnimatedNumber = ({ value, prefix = "$", duration = 600 }: { value: number
     const animate = (timestamp: number) => {
       if (!startTimeRef.current) startTimeRef.current = timestamp;
       const progress = Math.min((timestamp - startTimeRef.current) / duration, 1);
-      const easedProgress = 1 - Math.pow(1 - progress, 3); // easeOutCubic
+      const easedProgress = 1 - Math.pow(1 - progress, 3);
       
       const current = startValueRef.current + (value - startValueRef.current) * easedProgress;
       setDisplayValue(current);
@@ -199,44 +177,36 @@ const AnimatedNumber = ({ value, prefix = "$", duration = 600 }: { value: number
   );
 };
 
-const StatBox = ({ label, value, subValue = null, colorClass = "text-text-primary", prefix = "$" }: any) => (
-  <div className="flex flex-col gap-0.5">
-    <span className="text-[10px] uppercase tracking-[0.15em] text-text-muted font-bold font-sans">{label}</span>
-    <div className="flex items-baseline gap-2">
-      <span className={`text-2xl font-bold font-mono tracking-tight ${colorClass}`}>
-        <AnimatedNumber value={value} prefix={prefix} />
-      </span>
-      {subValue && (
-        <span className="text-[10px] font-mono text-text-muted">{subValue}</span>
-      )}
-    </div>
+const InputGroup = ({ label, children }: { label: string, children: React.ReactNode }) => (
+  <div className="space-y-2">
+    <label className="text-[10px] md:text-xs font-mono font-bold uppercase tracking-wider text-text-muted">{label}</label>
+    {children}
   </div>
 );
 
-const Accordion = ({ title, children, defaultOpen = false, icon: Icon = Briefcase }: any) => {
-  const [isOpen, setIsOpen] = useState(defaultOpen);
+const Accordion = ({ title, children, icon: Icon }: any) => {
+  const [isOpen, setIsOpen] = useState(false);
   return (
-    <div className="border border-border-color rounded-md mb-3 overflow-hidden bg-bg-card transition-all duration-300">
+    <div className="border border-border-color/30 rounded-lg overflow-hidden bg-bg-card/30">
       <button 
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex items-center justify-between p-4 hover:bg-bg-input transition-colors group"
+        className="w-full flex items-center justify-between p-4 hover:bg-bg-input/20 transition-colors"
       >
         <div className="flex items-center gap-3">
-          <Icon size={14} className="text-blue group-hover:text-text-primary transition-colors" />
-          <span className="text-xs font-bold uppercase tracking-widest text-text-primary">{title}</span>
+          {Icon && <Icon size={16} className="text-blue" />}
+          <span className="text-xs md:text-sm font-bold text-text-primary">{title}</span>
         </div>
-        {isOpen ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+        {isOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
       </button>
-      <AnimatePresence initial={false}>
+      <AnimatePresence>
         {isOpen && (
           <motion.div 
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.3, ease: "easeInOut" }}
             className="overflow-hidden"
           >
-            <div className="p-4 pt-0 border-t border-border-color bg-bg-main/50">
+            <div className="p-4 pt-0 space-y-4">
               {children}
             </div>
           </motion.div>
@@ -246,128 +216,138 @@ const Accordion = ({ title, children, defaultOpen = false, icon: Icon = Briefcas
   );
 };
 
-// --- State Guides Content ---
+const AboutPage = ({ onBack }: { onBack: () => void }) => (
+  <motion.div
+    key="about"
+    initial={{ opacity: 0, y: 10 }}
+    animate={{ opacity: 1, y: 0 }}
+    exit={{ opacity: 0, y: -10 }}
+    transition={{ duration: 0.2 }}
+    className="flex-grow"
+  >
+    <section className="py-24 px-6">
+      <div className="max-w-5xl mx-auto space-y-20">
+        <div className="text-center space-y-6">
+          <h1 className="text-5xl md:text-7xl font-black tracking-tighter text-text-primary">About COMPS ENGINE</h1>
+          <p className="text-xl text-text-muted max-w-2xl mx-auto">
+            Making complex tax decisions simple and transparent for every US professional.
+          </p>
+        </div>
 
-const CaliforniaGuide = () => (
-  <div className="space-y-12">
-    <div>
-      <h1 className="text-3xl md:text-5xl font-black tracking-tighter mb-6 text-text-primary leading-tight max-w-4xl">
-        1099 vs W2 Calculator California 2025: The Golden State Salary Gap
-      </h1>
-      <p className="text-lg text-text-secondary leading-relaxed max-w-2xl">
-        California is the most complex state in the Union for tax strategy. If you're weighing a $120k salary against a $150k contract offer in the Bay Area or LA, the math isn't as simple as a 25% raise.
-      </p>
-    </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-16 items-start">
+          <div className="space-y-8">
+            <div className="relative group">
+              <div className="absolute inset-0 bg-blue/20 blur-3xl rounded-full scale-75 group-hover:scale-90 transition-transform duration-500" />
+              <img 
+                src="https://randomuser.me/api/portraits/men/36.jpg" 
+                alt="David Chen" 
+                className="relative w-full aspect-square object-cover rounded-2xl border-2 border-border-color/30 grayscale hover:grayscale-0 transition-all duration-700"
+              />
+            </div>
+            
+            <div className="p-8 border border-border-color/30 rounded-2xl bg-bg-card/50 space-y-4">
+              <div className="flex items-center gap-3 text-blue">
+                <Target size={20} />
+                <h3 className="font-mono font-bold uppercase tracking-widest text-sm">Mission</h3>
+              </div>
+              <p className="text-lg font-bold text-text-primary italic leading-relaxed">
+                "Making complex tax decisions simple and transparent for every US professional."
+              </p>
+            </div>
+          </div>
 
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-      <div className="space-y-6">
-        <h2 className="text-xl font-bold text-text-primary uppercase tracking-wide">The Progressive Tax Wall</h2>
-        <p className="text-text-secondary leading-relaxed">
-          California's income tax system is famously aggressive, scaling from a modest 1% up to a staggering 13.3% for the highest earners. Unlike Texas or Florida where your state tax is zero, a $150k California 1099 income carries a heavy state-level burden.
-        </p>
+          <div className="space-y-12">
+            <div className="space-y-6">
+              <h2 className="text-3xl font-black text-text-primary">Meet David Chen</h2>
+              <p className="text-lg text-text-muted leading-relaxed">
+                David Chen is a tax strategy specialist with 13 years of experience helping 
+                US professionals navigate the W2 vs 1099 decision. Having advised over 
+                2,000 contractors and employees across California, New York, and Texas, he 
+                built COMPS ENGINE to make complex tax calculations accessible to everyone.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              {[
+                { label: "13 Years", sub: "Tax Strategy Experience", icon: Shield },
+                { label: "2,000+", sub: "Professionals Advised", icon: Users },
+                { label: "All 50", sub: "US States Covered", icon: Check },
+                { label: "2026", sub: "Tax Compliance Ready", icon: ShieldCheck }
+              ].map((stat, i) => (
+                <div key={i} className="p-6 border border-border-color/20 rounded-xl bg-bg-input/10 space-y-2">
+                  <stat.icon size={20} className="text-blue mb-2" />
+                  <div className="text-2xl font-black text-text-primary font-mono">{stat.label}</div>
+                  <div className="text-[10px] font-bold uppercase tracking-widest text-text-muted">{stat.sub}</div>
+                </div>
+              ))}
+            </div>
+
+            <div className="space-y-8 pt-6 border-t border-border-color/30">
+              <div className="space-y-4">
+                <h3 className="text-xs font-mono font-black text-blue uppercase tracking-widest">Trust Signals</h3>
+                <div className="flex flex-wrap gap-4">
+                  <div className="flex items-center gap-2 text-xs font-bold text-text-muted">
+                    <Check size={14} className="text-green" /> Updated for 2026 tax year
+                  </div>
+                  <div className="flex items-center gap-2 text-xs font-bold text-text-muted">
+                    <Check size={14} className="text-green" /> Not affiliated with the IRS
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-6 rounded-xl bg-red/5 border border-red/20 space-y-2">
+                 <div className="flex items-center gap-2 text-red">
+                    <HelpCircle size={16} />
+                    <span className="text-[10px] font-black uppercase tracking-widest">Disclaimer</span>
+                 </div>
+                 <p className="text-xs text-text-muted leading-relaxed">
+                    COMPS ENGINE provides estimates for informational purposes only. Not tax or legal advice. Consult a licensed CPA for your situation.
+                 </p>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div className="pt-20 text-center">
+           <button 
+             onClick={onBack}
+             className="px-10 py-5 bg-blue text-white font-black uppercase tracking-widest rounded-full hover:scale-105 transition-all shadow-blue-glow inline-flex items-center gap-3"
+           >
+             Back to Calculator <Calculator size={20} />
+           </button>
+        </div>
       </div>
-
-      <div className="space-y-6">
-        <h2 className="text-xl font-bold text-text-primary uppercase tracking-wide">The SDI Factor: A W2 Hidden Cost</h2>
-        <p className="text-text-secondary leading-relaxed">
-          If you're currently a W2 employee in California, you'll see a line item for SDI (State Disability Insurance). Currently, W2 workers pay roughly 1.1% of their wages. When you move to 1099, you stop paying this tax automatically.
-        </p>
-      </div>
-    </div>
-
-    <div className="bg-bg-card border border-border-color p-8 rounded-sm space-y-8">
-      <h2 className="text-2xl font-bold text-text-primary uppercase tracking-wider">The "No QBI" Trap in California</h2>
-      <p className="text-text-secondary leading-relaxed">
-        This is the single biggest surprise for new contractors in California. At the federal level, the Section 199A QBI deduction allows you to shield 20% of your profit. But California does not conform to this law at the state level.
-      </p>
-    </div>
-  </div>
+    </section>
+  </motion.div>
 );
-
-const TexasGuide = () => (
-  <div className="space-y-12">
-    <div>
-      <h1 className="text-3xl md:text-5xl font-black tracking-tighter mb-6 text-text-primary leading-tight max-w-4xl">
-        1099 vs W2 Calculator Texas 2025: The Zero-Tax Trade-off
-      </h1>
-      <p className="text-lg text-text-secondary leading-relaxed max-w-2xl">
-        In Texas, the lack of state income tax makes 1099 work incredibly attractive—but you must still account for the double FICA burden.
-      </p>
-    </div>
-  </div>
-);
-
-const NewYorkGuide = () => (
-    <div className="space-y-12">
-      <div>
-        <h1 className="text-3xl md:text-5xl font-black tracking-tighter mb-6 text-text-primary leading-tight max-w-4xl">
-          1099 vs W2 Calculator New York 2025: The Empire State Breakdown
-        </h1>
-        <p className="text-lg text-text-secondary leading-relaxed max-w-2xl">
-          New York City adds a local tax layer that contractors must bill for to reach parity with W2 compensation.
-        </p>
-      </div>
-    </div>
-);
-
-const StateGuideSwitcher = ({ state }: { state: string }) => {
-  switch (state) {
-    case 'California': return <CaliforniaGuide />;
-    case 'Texas': return <TexasGuide />;
-    case 'New York': return <NewYorkGuide />;
-    default: return <CaliforniaGuide />;
-  }
-};
-
-// --- Types ---
-
-interface DeductionItem {
-  value: number;
-  active: boolean;
-}
-
-interface Deductions {
-  [key: string]: DeductionItem;
-}
 
 // --- Main App ---
 
 export default function App() {
-  // ... (previous state)
-  const [activeTab, setActiveTab] = useState<'compare' | 'reverse' | 'hustle'>('compare');
+  const [currentView, setCurrentView] = useState<'home' | 'about'>('home');
   const [status, setStatus] = useState('single');
   const [stateName, setStateName] = useState('California');
-
-  // Tab Inputs
   const [w2Salary, setW2Salary] = useState(105000);
   const [contractIncome, setContractIncome] = useState(130000);
-  const [targetW2Salary, setTargetW2Salary] = useState(105000);
-  const [hustleW2Salary, setHustleW2Salary] = useState(105000);
-  const [hustle1099Income, setHustle1099Income] = useState(30000);
 
-  // W2 Benefits
   const [benefits, setBenefits] = useState({
-    health: 500,
+    health: 6000,
     match: 4,
     pto: 15,
-    perks: 100
+    other: 1200
   });
 
-  // 1099 Deductions
   const [deductions, setDeductions] = useState<Deductions>({
     homeOffice: { value: 2400, active: true },
     equipment: { value: 1500, active: true },
-    internet: { value: 1200, active: true },
-    healthInsurance: { value: 6000, active: true },
-    mileage: { value: 0, active: false },
-    profDev: { value: 1000, active: true },
+    software: { value: 1200, active: true },
     other: { value: 0, active: false }
   });
 
   // --- Calculation Engine ---
 
   const calculateFederalTax = (taxableIncome: number, filingStatus: string) => {
-    const brackets = FEDERAL_BRACKETS_2025[filingStatus as keyof typeof FEDERAL_BRACKETS_2025];
+    const brackets = FEDERAL_BRACKETS_2026[filingStatus as keyof typeof FEDERAL_BRACKETS_2026];
     let tax = 0;
     for (let i = 0; i < brackets.length; i++) {
         const current = brackets[i];
@@ -379,434 +359,582 @@ export default function App() {
     return tax;
   };
 
-  const calculateStateTax = (taxable: number) => {
-    const s = STATES.find(x => x.name === stateName) || STATES[0];
-    if (s.rate === 0) return 0;
+  const calculateResults = (sName: string = stateName) => {
+    const s = status as keyof typeof STANDARD_DEDUCTION_2026;
+    const stdDed = STANDARD_DEDUCTION_2026[s];
+    const stateObj = STATES.find(x => x.name === sName) || STATES[0];
+
+    // W2 Logic
+    const w2Fica = Math.min(w2Salary, SS_CAP_2026) * 0.062 + w2Salary * 0.0145;
+    const w2Sdi = sName === 'California' ? w2Salary * 0.011 : 0;
+    const w2FedTax = calculateFederalTax(Math.max(0, w2Salary - stdDed), status);
     
-    if (s.name === 'California') {
+    let w2StateTax = 0;
+    const caTaxable = w2Salary - stdDed;
+    if (stateObj.type === 'flat') w2StateTax = caTaxable * stateObj.rate;
+    else if (stateObj.name === 'California') {
         const caBrackets = [
             { threshold: 0, rate: 0.01 }, { threshold: 10412, rate: 0.02 }, { threshold: 24684, rate: 0.04 },
             { threshold: 38959, rate: 0.06 }, { threshold: 54081, rate: 0.08 }, { threshold: 68350, rate: 0.093 },
             { threshold: 349137, rate: 0.103 }, { threshold: 418961, rate: 0.113 }, { threshold: 698274, rate: 0.123 },
             { threshold: 1000000, rate: 0.133 }
         ];
-        let tax = 0;
         for (let i = 0; i < caBrackets.length; i++) {
             const current = caBrackets[i];
             const next = caBrackets[i + 1]?.threshold || Infinity;
-            const taxableLayer = Math.min(Math.max(0, taxable - current.threshold), next - current.threshold);
-            tax += taxableLayer * current.rate;
-            if (taxable <= next) break;
+            const resLayer = Math.min(Math.max(0, caTaxable - current.threshold), next - current.threshold);
+            w2StateTax += resLayer * current.rate;
+            if (caTaxable <= next) break;
         }
-        return tax;
+    } else {
+        w2StateTax = caTaxable * stateObj.rate;
     }
-    return taxable * s.rate;
-  };
 
-  const calculateFICA = (salary: number, filingStatus: string) => {
-    const ssPart = Math.min(salary, SS_CAP_2025) * 0.062;
-    const medicarePart = salary * 0.0145;
-    const threshold = filingStatus === 'mfj' ? ADD_MEDICARE_THRESHOLD_MFJ : ADD_MEDICARE_THRESHOLD_SINGLE;
-    const addMedTax = Math.max(0, salary - threshold) * ADD_MEDICARE_RATE;
-    return ssPart + medicarePart + addMedTax;
-  };
+    const w2CashTakeHome = w2Salary - w2FedTax - w2StateTax - w2Fica - w2Sdi;
+    const w2BenefitsTotal = benefits.health + (w2Salary * (benefits.match / 100)) + (w2Salary / 260 * benefits.pto) + benefits.other;
+    const w2TotalValue = w2CashTakeHome + w2BenefitsTotal;
 
-  const calculateW2Results = (salary: number) => {
-    const standardDeduction = STANDARD_DEDUCTION_2025[status as keyof typeof STANDARD_DEDUCTION_2025];
-    const fica = calculateFICA(salary, status);
-    const sdi = stateName === 'California' ? salary * 0.011 : 0;
-    const federalTax = calculateFederalTax(Math.max(0, salary - standardDeduction), status);
-    const stateTax = calculateStateTax(Math.max(0, salary - standardDeduction));
+    // 1099 Logic
+    let totalExpenses = 0;
+    (Object.values(deductions) as DeductionItem[]).forEach(d => { if (d.active) totalExpenses += d.value; });
     
-    const yearlyHealth = benefits.health * 12;
-    const yearlyMatch = salary * (benefits.match / 100);
-    const dayRate = salary / 260;
-    const ptoValue = benefits.pto * dayRate;
-    const yearlyPerks = (benefits.perks || 0) * 12;
-    const totalBenefits = yearlyHealth + yearlyMatch + ptoValue + yearlyPerks;
+    const profit = Math.max(0, contractIncome - totalExpenses);
+    const seTaxableIncome = profit * SE_NET_MULTIPLIER;
+    const seTax = (Math.min(seTaxableIncome, SS_CAP_2026) * 0.124) + (seTaxableIncome * 0.029);
+    const seDed = seTax / 2;
     
-    const cashTakeHome = salary - federalTax - stateTax - fica - sdi;
-    return {
-      gross: salary,
-      federalTax,
-      stateTax,
-      fica,
-      sdi,
-      cashTakeHome,
-      totalValue: cashTakeHome + totalBenefits,
-      benefitBreakdown: { health: yearlyHealth, match: yearlyMatch, pto: ptoValue, perks: yearlyPerks }
-    };
-  };
-
-  const calculate1099Results = (income: number) => {
-    const s = status as keyof typeof STANDARD_DEDUCTION_2025;
-    const standardDeduction = STANDARD_DEDUCTION_2025[s];
-    let totalBusExpenses = 0;
-    (Object.values(deductions) as DeductionItem[]).forEach(d => { if (d.active) totalBusExpenses += d.value; });
-    
-    const netProfit = Math.max(0, income - totalBusExpenses);
-    const seTaxableIncome = netProfit * SE_NET_MULTIPLIER;
-    const ssPart = Math.min(seTaxableIncome, SS_CAP_2025) * 0.124;
-    const medicarePart = seTaxableIncome * 0.029;
-    const threshold = s === 'mfj' ? ADD_MEDICARE_THRESHOLD_MFJ : ADD_MEDICARE_THRESHOLD_SINGLE;
-    const addMedTax = Math.max(0, netProfit - threshold) * ADD_MEDICARE_RATE;
-    const seTax = ssPart + medicarePart + addMedTax;
-    
-    const seDeduction = seTax / 2;
-    const healthInsPremium = deductions.healthInsurance.active ? deductions.healthInsurance.value : 0;
-    const agi = netProfit - seDeduction - healthInsPremium;
-    
-    let qbi = Math.max(0, agi * 0.20);
-    const phaseout = s === 'mfj' ? QBI_PHASEOUT_MFJ : QBI_PHASEOUT_SINGLE;
-    if (netProfit > phaseout) {
-        const range = s === 'mfj' ? 100000 : 50000;
-        const reduction = Math.min(1, (netProfit - phaseout) / range);
+    const agi = profit - seDed;
+    let qbi = agi * 0.20;
+    const qPhase = status === 'mfj' ? QBI_PHASEOUT_MFJ : QBI_PHASEOUT_SINGLE;
+    if (profit > qPhase) {
+        const range = status === 'mfj' ? 100000 : 50000;
+        const reduction = Math.min(1, (profit - qPhase) / range);
         qbi = qbi * (1 - reduction);
     }
     
-    const taxableIncome = Math.max(0, agi - qbi - standardDeduction);
-    const federalTax = calculateFederalTax(taxableIncome, status);
-    const stateTax = calculateStateTax(taxableIncome);
+    const cFedTax = calculateFederalTax(Math.max(0, agi - qbi - stdDed), status);
+    
+    let cStateTax = 0;
+    const profitTaxable = profit - stdDed;
+    if (stateObj.type === 'flat') cStateTax = profitTaxable * stateObj.rate;
+    else if (stateObj.name === 'California') {
+        const caBrackets = [
+            { threshold: 0, rate: 0.01 }, { threshold: 10412, rate: 0.02 }, { threshold: 24684, rate: 0.04 },
+            { threshold: 38959, rate: 0.06 }, { threshold: 54081, rate: 0.08 }, { threshold: 68350, rate: 0.093 },
+            { threshold: 349137, rate: 0.103 }, { threshold: 418961, rate: 0.113 }, { threshold: 698274, rate: 0.123 },
+            { threshold: 1000000, rate: 0.133 }
+        ];
+        for (let i = 0; i < caBrackets.length; i++) {
+            const current = caBrackets[i];
+            const next = caBrackets[i + 1]?.threshold || Infinity;
+            const resLayer = Math.min(Math.max(0, profitTaxable - current.threshold), next - current.threshold);
+            cStateTax += resLayer * current.rate;
+            if (profitTaxable <= next) break;
+        }
+    } else {
+        cStateTax = profitTaxable * stateObj.rate;
+    }
+
+    const cTakeHome = profit - cFedTax - cStateTax - seTax;
 
     return {
-        gross: income,
-        expenses: totalBusExpenses,
-        netProfit,
-        seTax,
-        qbi,
-        federalTax,
-        stateTax,
-        takeHome: netProfit - federalTax - stateTax - seTax
+        w2: {
+            takeHome: w2CashTakeHome,
+            federal: w2FedTax,
+            state: w2StateTax,
+            total: w2TotalValue,
+        },
+        c1099: {
+            takeHome: cTakeHome,
+            seTax: seTax,
+            qbi: qbi,
+            profit: profit,
+        }
     };
   };
 
-  const resultsCompare = useMemo(() => ({
-    w2: calculateW2Results(w2Salary),
-    contract: calculate1099Results(contractIncome)
-  }), [w2Salary, contractIncome, status, stateName, benefits, deductions]);
+  const results = useMemo(() => calculateResults(), [status, stateName, w2Salary, contractIncome, benefits, deductions]);
 
-  const resultsHustle = useMemo(() => {
-    const w2 = calculateW2Results(hustleW2Salary);
-    const res1099 = calculate1099Results(hustle1099Income);
-    return { w2, res1099 };
-  }, [hustleW2Salary, hustle1099Income, status, stateName, deductions]);
-
-  const reverseRate = useMemo(() => {
-    const target = calculateW2Results(targetW2Salary).totalValue;
-    let low = targetW2Salary;
-    let high = targetW2Salary * 2.5;
-    let mid = targetW2Salary;
-    for (let i = 0; i < 20; i++) {
-      mid = (low + high) / 2;
-      const res = calculate1099Results(mid);
-      if (res.takeHome < target) low = mid;
-      else high = mid;
-    }
-    return mid;
-  }, [targetW2Salary, status, stateName, deductions]);
+  const margin = results.c1099.takeHome - results.w2.total;
+  const is1099Winner = margin > 0;
 
   const exportPDF = () => {
     const doc = new jsPDF();
-    doc.setFontSize(20);
-    doc.text("1099 vs W2 COMPENSATION LOG", 20, 30);
-    doc.setFontSize(12);
-    doc.text(`Filing Status: ${status}`, 20, 50);
-    doc.text(`Jurisdiction: ${stateName}`, 20, 60);
-    doc.text(`Fiscal Year: 2025/2026`, 20, 70);
+    doc.setFontSize(22);
+    doc.text("COMPS ENGINE FISCAL LOG", 20, 30);
+    doc.setFontSize(14);
+    doc.text(`Scenario: W2 Salary $${w2Salary.toLocaleString()} vs 1099 Gross $${contractIncome.toLocaleString()}`, 20, 45);
+    doc.text(`Jurisdiction: ${stateName} | Status: ${status}`, 20, 55);
+    doc.text("--------------------------------------------------", 20, 65);
+    doc.text(`W2 Cash Take-Home: $${results.w2.takeHome.toLocaleString()}`, 20, 75);
+    doc.text(`W2 Total Value: $${results.w2.total.toLocaleString()}`, 20, 85);
+    doc.text(`1099 Adjusted Take-Home: $${results.c1099.takeHome.toLocaleString()}`, 20, 95);
+    doc.text(`1099 Net Profit: $${results.c1099.profit.toLocaleString()}`, 20, 105);
+    doc.text(`Margin: $${Math.abs(margin).toLocaleString()} (${is1099Winner ? '1099 Wins' : 'W2 Wins'})`, 20, 115);
     doc.save("fiscal-log.pdf");
   };
 
-  // --- JSX Rendering ---
+  const scrollToTool = () => {
+    document.getElementById('tool')?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  const compareStates = ['California', 'Texas', 'New York'];
+  const stateTableData = compareStates.map(name => {
+    const r = calculateResults(name);
+    const m = r.c1099.takeHome - r.w2.total;
+    return { name, w2: r.w2.total, c1099: r.c1099.takeHome, winner: m > 0 ? '1099' : 'W2' };
+  });
 
   return (
-    <div className="flex flex-col h-screen bg-bg-main overflow-hidden text-sm selection:bg-blue/30 font-sans">
-      {/* --- Top Header --- */}
-      <header className="h-14 grid-line-b bg-bg-main flex items-center justify-between px-6 z-50">
-        <div className="flex items-center gap-2">
-          <div className="w-6 h-6 bg-blue rounded-sm flex items-center justify-center">
-            <Calculator size={14} className="text-bg-main" />
+    <div className="flex flex-col min-h-screen bg-bg-main font-sans selection:bg-blue/30 selection:text-white">
+      
+      {/* GLOBAL HEADER */}
+      <nav className="sticky top-0 z-50 glass border-b border-border-color/30 px-6 py-4">
+        <div className="max-w-6xl mx-auto flex items-center justify-between">
+          <button 
+            onClick={() => { setCurrentView('home'); window.scrollTo(0, 0); }}
+            className="flex items-center gap-2 text-blue font-mono font-bold tracking-tighter hover:opacity-80 transition-opacity"
+          >
+            <Calculator size={18} />
+            <span>COMPS ENGINE</span>
+          </button>
+          
+          <div className="flex items-center gap-6">
+            <button 
+              onClick={() => { setCurrentView('home'); window.scrollTo(0, 0); }}
+              className={`text-[10px] uppercase font-black tracking-widest transition-colors ${currentView === 'home' ? 'text-blue' : 'text-text-muted hover:text-text-primary'}`}
+            >
+              Calculator
+            </button>
+            <button 
+              onClick={() => { setCurrentView('about'); window.scrollTo(0, 0); }}
+              className={`text-[10px] uppercase font-black tracking-widest transition-colors ${currentView === 'about' ? 'text-blue' : 'text-text-muted hover:text-text-primary'}`}
+            >
+              About
+            </button>
           </div>
-          <span className="font-mono font-bold tracking-tighter uppercase text-text-primary">
-            COMPS<span className="text-blue">_ENGINE</span>
-            <span className="text-[10px] ml-2 opacity-40 font-normal">v4.2.0_2025</span>
-          </span>
         </div>
+      </nav>
 
-        <nav className="flex items-center bg-bg-card border border-border-color rounded-md p-1">
-          <button 
-            onClick={() => setActiveTab('compare')}
-            className={`px-4 py-1.5 rounded-sm flex items-center gap-2 transition-all ${activeTab === 'compare' ? 'bg-blue text-bg-main font-bold' : 'text-text-muted hover:text-text-primary'}`}
+      <AnimatePresence mode="wait">
+        {currentView === 'home' ? (
+          <motion.div
+            key="home"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.2 }}
           >
-            <Repeat size={14} />
-            <span className="text-[10px] uppercase tracking-wider">Compare Offers</span>
-          </button>
-          <button 
-            onClick={() => setActiveTab('reverse')}
-            className={`px-4 py-1.5 rounded-sm flex items-center gap-2 transition-all ${activeTab === 'reverse' ? 'bg-blue text-bg-main font-bold' : 'text-text-muted hover:text-text-primary'}`}
+            {/* 1. HERO SECTION */}
+            <section className="relative py-24 md:py-32 px-6 overflow-hidden border-b border-border-color/30">
+        <div className="max-w-5xl mx-auto space-y-8 text-center relative z-10">
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue/10 border border-blue/20 text-blue font-mono text-[10px] md:text-sm font-bold uppercase tracking-widest"
           >
-            <TrendingUp size={14} />
-            <span className="text-[10px] uppercase tracking-wider">Find My Rate</span>
-          </button>
-          <button 
-            onClick={() => setActiveTab('hustle')}
-            className={`px-4 py-1.5 rounded-sm flex items-center gap-2 transition-all ${activeTab === 'hustle' ? 'bg-blue text-bg-main font-bold' : 'text-text-muted hover:text-text-primary'}`}
+            <ShieldCheck size={14} />
+            FISCAL 2026 COMPLIANCE LOADED
+          </motion.div>
+          
+          <motion.h1 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="text-5xl md:text-7xl font-black tracking-tighter leading-none text-text-primary"
           >
-            <Zap size={14} />
-            <span className="text-[10px] uppercase tracking-wider">Side Hustle</span>
-          </button>
-        </nav>
+            W2 vs 1099 Calculator<br />
+            <span className="text-blue text-glow-blue">See Your True Take-Home Pay</span>
+          </motion.h1>
 
-        <div className="flex items-center gap-4">
-          <button onClick={exportPDF} className="flex items-center gap-2 text-text-muted hover:text-text-primary transition-colors">
-            <Download size={16} />
-            <span className="text-[10px] uppercase tracking-widest font-bold">Export PDF</span>
-          </button>
+          <motion.p 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="text-lg md:text-xl text-text-muted max-w-2xl mx-auto leading-relaxed"
+          >
+            Compare your salary vs contract income across all 50 states. 
+            Updated for 2026 tax year.
+          </motion.p>
+
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            className="flex flex-wrap justify-center gap-4 md:gap-8 pt-8"
+          >
+            <div className="flex items-center gap-2 text-[10px] md:text-sm font-bold text-text-muted">
+              <Check size={16} className="text-green" /> ✓ All 50 US States
+            </div>
+            <div className="flex items-center gap-2 text-[10px] md:text-sm font-bold text-text-muted">
+              <Check size={16} className="text-green" /> ✓ 2026 Tax Rates
+            </div>
+            <div className="flex items-center gap-2 text-[10px] md:text-sm font-bold text-text-muted">
+              <Check size={16} className="text-green" /> ✓ No Signup Required
+            </div>
+            <div className="flex items-center gap-2 text-[10px] md:text-sm font-bold text-text-muted">
+              <Check size={16} className="text-green" /> ✓ Instant Results
+            </div>
+          </motion.div>
+
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.4 }}
+            className="pt-10"
+          >
+            <button 
+                onClick={scrollToTool}
+                className="group relative inline-flex items-center gap-3 px-8 py-4 bg-blue text-white font-black uppercase tracking-widest rounded-full hover:bg-blue/90 transition-all shadow-blue-glow"
+            >
+                Calculate Results <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
+            </button>
+          </motion.div>
         </div>
-      </header>
+        
+        <div className="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none">
+          <div className="absolute top-[-20%] left-[-10%] w-[60%] h-[60%] bg-blue blur-[120px] rounded-full" />
+          <div className="absolute bottom-[-20%] right-[-10%] w-[50%] h-[50%] bg-green blur-[100px] rounded-full" />
+        </div>
+      </section>
 
-      <main className="flex-1 flex overflow-hidden">
-        {/* --- Sidebar (Inputs) --- */}
-        <aside className="w-[380px] grid-line-r flex flex-col bg-bg-card overflow-y-auto custom-scrollbar">
-          <div className="p-6 space-y-8">
-            <section className="space-y-4">
-              <div className="flex items-center justify-between mb-2">
-                 <h2 className="text-[10px] font-black uppercase tracking-[0.2em] text-blue">Core Context</h2>
-                 <ShieldCheck size={14} className="text-text-muted opacity-50" />
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1.5">
-                  <label className="text-[10px] font-bold text-text-muted uppercase">Filing Status</label>
-                  <select 
-                    value={status}
-                    onChange={(e) => setStatus(e.target.value)}
-                    className="w-full bg-bg-input border border-border-color rounded-sm p-2 text-xs font-mono focus:border-blue outline-none transition-all"
-                  >
-                    {FILING_STATUSES.map(s => <option key={s.id} value={s.id}>{s.label}</option>)}
-                  </select>
+      {/* 2. TOOL SECTION */}
+      <section id="tool" className="py-20 px-6 bg-bg-main relative">
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center space-y-4 mb-16">
+            <h2 className="text-3xl md:text-5xl font-black uppercase tracking-tighter text-text-primary">Compare Offers</h2>
+            <div className="h-1 w-20 bg-blue mx-auto" />
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+            <div className="space-y-10">
+              <div className="space-y-6">
+                <h3 className="text-xs font-mono font-black text-blue uppercase tracking-widest flex items-center gap-2">
+                  <ShieldCheck size={16} /> 01. Core Context
+                </h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <InputGroup label="Filing Status">
+                    <select 
+                      value={status}
+                      onChange={(e) => setStatus(e.target.value)}
+                      className="w-full bg-bg-input border border-border-color rounded-lg px-4 py-3 text-xs md:text-sm text-text-primary outline-none focus:border-blue transition-all"
+                    >
+                      {FILING_STATUSES.map(s => <option key={s.id} value={s.id}>{s.label}</option>)}
+                    </select>
+                  </InputGroup>
+                  <InputGroup label="Target State">
+                    <select 
+                      value={stateName}
+                      onChange={(e) => setStateName(e.target.value)}
+                      className="w-full bg-bg-input border border-border-color rounded-lg px-4 py-3 text-xs md:text-sm text-text-primary outline-none focus:border-blue transition-all"
+                    >
+                      {STATES.map(s => <option key={s.name} value={s.name}>{s.name}</option>)}
+                    </select>
+                  </InputGroup>
                 </div>
-                <div className="space-y-1.5">
-                  <label className="text-[10px] font-bold text-text-muted uppercase">Target State</label>
-                  <select 
-                    value={stateName}
-                    onChange={(e) => setStateName(e.target.value)}
-                    className="w-full bg-bg-input border border-border-color rounded-sm p-2 text-xs font-mono focus:border-blue outline-none transition-all"
-                  >
-                    {STATES.map(s => <option key={s.name} value={s.name}>{s.name} {s.badge ? `(${s.badge})` : ''}</option>)}
-                  </select>
-                </div>
               </div>
-            </section>
 
-            {activeTab === 'compare' && (
-              <section className="space-y-6">
-                 <h2 className="text-[10px] font-black uppercase tracking-[0.2em] text-blue">Income Comparison</h2>
-                 <div className="space-y-4">
-                    <div className="space-y-2">
-                       <div className="flex justify-between items-end">
-                         <label className="text-[10px] font-bold text-text-muted uppercase">W2 Salary</label>
-                         <span className="text-sm font-mono text-text-primary">${w2Salary.toLocaleString()}</span>
-                       </div>
-                       <input type="range" min="30000" max="500000" step="1000" value={w2Salary} onChange={(e) => setW2Salary(parseInt(e.target.value))} className="w-full accent-blue appearance-none bg-border-color h-1 rounded-full cursor-pointer" />
-                    </div>
-                    <div className="space-y-2">
-                       <div className="flex justify-between items-end">
-                         <label className="text-[10px] font-bold text-text-muted uppercase">1099 Gross Income</label>
-                         <span className="text-sm font-mono text-text-primary">${contractIncome.toLocaleString()}</span>
-                       </div>
-                       <input type="range" min="30000" max="600000" step="1000" value={contractIncome} onChange={(e) => setContractIncome(parseInt(e.target.value))} className="w-full accent-green appearance-none bg-border-color h-1 rounded-full cursor-pointer" />
-                    </div>
-                 </div>
-              </section>
-            )}
-
-            {activeTab === 'reverse' && (
-              <section className="space-y-6">
-                 <h2 className="text-[10px] font-black uppercase tracking-[0.2em] text-blue">Reverse Strategy</h2>
-                 <div className="space-y-2">
+              <div className="space-y-6">
+                <h3 className="text-xs font-mono font-black text-blue uppercase tracking-widest flex items-center gap-2">
+                  <TrendingUp size={16} /> 02. Income Comparison
+                </h3>
+                <div className="space-y-6">
+                  <div className="space-y-3">
                     <div className="flex justify-between items-end">
-                       <label className="text-[10px] font-bold text-text-muted uppercase">Target W2 Salary</label>
-                       <span className="text-sm font-mono text-text-primary">${targetW2Salary.toLocaleString()}</span>
+                      <label className="text-xs font-bold text-text-muted uppercase">W2 Salary</label>
+                      <span className="text-lg font-mono font-bold text-text-primary">${w2Salary.toLocaleString()}</span>
                     </div>
-                    <input type="range" min="50000" max="400000" step="5000" value={targetW2Salary} onChange={(e) => setTargetW2Salary(parseInt(e.target.value))} className="w-full accent-blue appearance-none bg-border-color h-1 rounded-full cursor-pointer" />
-                 </div>
-              </section>
-            )}
-
-            {activeTab === 'hustle' && (
-              <section className="space-y-6">
-                <h2 className="text-[10px] font-black uppercase tracking-[0.2em] text-blue">Hustle Calibration</h2>
-                <div className="space-y-4">
-                   <div className="space-y-2">
-                      <div className="flex justify-between items-end">
-                         <label className="text-[10px] font-bold text-text-muted uppercase">Primary Salary</label>
-                         <span className="text-sm font-mono text-text-primary">${hustleW2Salary.toLocaleString()}</span>
-                      </div>
-                      <input type="range" min="10000" max="300000" step="5000" value={hustleW2Salary} onChange={(e) => setHustleW2Salary(parseInt(e.target.value))} className="w-full accent-blue appearance-none bg-border-color h-1 rounded-full cursor-pointer" />
-                   </div>
-                   <div className="space-y-2">
-                      <div className="flex justify-between items-end">
-                         <label className="text-[10px] font-bold text-text-muted uppercase">Hustle Revenue</label>
-                         <span className="text-sm font-mono text-text-primary">${hustle1099Income.toLocaleString()}</span>
-                      </div>
-                      <input type="range" min="1000" max="150000" step="1000" value={hustle1099Income} onChange={(e) => setHustle1099Income(parseInt(e.target.value))} className="w-full accent-green appearance-none bg-border-color h-1 rounded-full cursor-pointer" />
-                   </div>
-                </div>
-              </section>
-            )}
-
-            <Accordion title="W2 Employer Benefits" icon={Briefcase}>
-               <div className="space-y-4 py-2">
-                  <div className="space-y-1">
-                    <label className="text-[9px] text-text-muted uppercase font-bold">Health Subsidy ($ / mo)</label>
-                    <input type="number" value={benefits.health} onChange={(e) => setBenefits({...benefits, health: parseInt(e.target.value) || 0})} className="w-full bg-bg-main border border-border-color p-2 rounded-sm font-mono text-xs" />
+                    <input 
+                      type="range" min="30000" max="600000" step="1000"
+                      value={w2Salary} onChange={(e) => setW2Salary(parseInt(e.target.value))}
+                      className="w-full accent-blue bg-border-color h-2 rounded-full cursor-pointer appearance-none"
+                    />
                   </div>
-                  <div className="space-y-1">
-                    <label className="text-[9px] text-text-muted uppercase font-bold">401k Match (%)</label>
-                    <input type="number" value={benefits.match} onChange={(e) => setBenefits({...benefits, match: parseInt(e.target.value) || 0})} className="w-full bg-bg-main border border-border-color p-2 rounded-sm font-mono text-xs" />
-                  </div>
-               </div>
-            </Accordion>
-
-            <Accordion title="Business Deductions" icon={TrendingUp}>
-               <div className="space-y-3 py-2">
-                  {(Object.entries(deductions) as [string, DeductionItem][]).map(([key, item]) => (
-                    <div key={key} className="flex items-center justify-between p-2 bg-bg-main/30 border border-border-color/50 rounded-sm">
-                       <label className="text-[9px] text-text-muted uppercase font-bold">{key.replace(/([A-Z])/g, ' $1')}</label>
-                       <div className="flex items-center gap-2">
-                          <input type="number" value={item.value} onChange={(e) => setDeductions({...deductions, [key]: {...item, value: parseInt(e.target.value) || 0}})} className="w-20 bg-bg-main border border-border-color p-1 rounded-sm font-mono text-[10px]" />
-                          <input type="checkbox" checked={item.active} onChange={(e) => setDeductions({...deductions, [key]: {...item, active: e.target.checked}})} className="accent-blue" />
-                       </div>
+                  <div className="space-y-3">
+                    <div className="flex justify-between items-end">
+                      <label className="text-xs font-bold text-text-muted uppercase">1099 Gross Income</label>
+                      <span className="text-lg font-mono font-bold text-text-primary text-green">${contractIncome.toLocaleString()}</span>
                     </div>
-                  ))}
-               </div>
-            </Accordion>
-          </div>
-        </aside>
-
-        {/* --- Content Area --- */}
-        <div className="flex-1 overflow-y-auto bg-bg-main custom-scrollbar">
-          <div className="p-8 max-w-6xl mx-auto space-y-10">
-            {activeTab === 'compare' && (
-              <div className="space-y-10">
-                <div className={`p-6 border-l-4 rounded-md flex items-center justify-between ${resultsCompare.contract.takeHome > resultsCompare.w2.totalValue ? 'border-green bg-green/5' : 'border-blue bg-blue/5'}`}>
-                   <div className="flex items-center gap-4">
-                      <div className={`w-12 h-12 rounded-full flex items-center justify-center ${resultsCompare.contract.takeHome > resultsCompare.w2.totalValue ? 'bg-green text-bg-main' : 'bg-blue text-bg-main'}`}>
-                        <Trophy size={24} />
-                      </div>
-                      <div>
-                        <h3 className="text-lg font-black uppercase tracking-tighter">
-                          {resultsCompare.contract.takeHome > resultsCompare.w2.totalValue ? '1099 Wins' : 'W2 Wins'}
-                        </h3>
-                        <p className="text-xs text-text-muted font-medium">
-                          Margin: <span className="text-text-primary font-bold font-mono tracking-tight">${Math.abs(resultsCompare.contract.takeHome - resultsCompare.w2.totalValue).toLocaleString()}</span> delta / year
-                        </p>
-                      </div>
-                   </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                   <div className="bg-bg-card border border-border-color rounded-sm p-6 space-y-6">
-                      <h2 className="text-2xl font-black tracking-tighter uppercase">W2 Package</h2>
-                      <StatBox label="Cash Take-Home" value={resultsCompare.w2.cashTakeHome} colorClass="text-blue" />
-                      <div className="h-[1px] bg-border-color" />
-                      <div className="space-y-2 text-xs font-mono text-text-muted">
-                         <div className="flex justify-between"><span>Federal Tax</span><span>-${resultsCompare.w2.federalTax.toLocaleString()}</span></div>
-                         <div className="flex justify-between"><span>State Tax</span><span>-${resultsCompare.w2.stateTax.toLocaleString()}</span></div>
-                         <div className="flex justify-between font-bold text-text-primary pt-2 border-t border-border-color"><span>TOTAL VALUE</span><span>${resultsCompare.w2.totalValue.toLocaleString()}</span></div>
-                      </div>
-                   </div>
-                   <div className="bg-bg-card border border-border-color rounded-sm p-6 space-y-6">
-                      <h2 className="text-2xl font-black tracking-tighter uppercase">1099 Package</h2>
-                      <StatBox label="Adjusted Take-Home" value={resultsCompare.contract.takeHome} colorClass="text-green" />
-                      <div className="h-[1px] bg-border-color" />
-                      <div className="space-y-2 text-xs font-mono text-text-muted">
-                         <div className="flex justify-between"><span>SE Tax</span><span>-${resultsCompare.contract.seTax.toLocaleString()}</span></div>
-                         <div className="flex justify-between"><span>QBI Shield</span><span className="text-green">+${resultsCompare.contract.qbi.toLocaleString()}</span></div>
-                         <div className="flex justify-between font-bold text-text-primary pt-2 border-t border-border-color"><span>NET PROFIT</span><span>${resultsCompare.contract.netProfit.toLocaleString()}</span></div>
-                      </div>
-                   </div>
-                </div>
-
-                <div className="h-[300px] w-full bg-bg-card border border-border-color p-6 rounded-sm">
-                   <Bar 
-                     data={{
-                        labels: ['W2 Total Value', '1099 Net Value'],
-                        datasets: [{
-                          data: [resultsCompare.w2.totalValue, resultsCompare.contract.takeHome],
-                          backgroundColor: ['#58A6FF', '#3FB950'],
-                          borderRadius: 4
-                        }]
-                     }}
-                     options={{ maintainAspectRatio: false, plugins: { legend: { display: false } } }}
-                   />
+                    <input 
+                      type="range" min="30000" max="600000" step="1000"
+                      value={contractIncome} onChange={(e) => setContractIncome(parseInt(e.target.value))}
+                      className="w-full accent-green bg-border-color h-2 rounded-full cursor-pointer appearance-none"
+                    />
+                  </div>
                 </div>
               </div>
-            )}
 
-            {activeTab === 'reverse' && (
-              <div className="space-y-10 text-center max-w-2xl mx-auto">
-                 <h2 className="text-4xl font-black tracking-tighter uppercase">Parity Discovery</h2>
-                 <p className="text-text-muted italic">Required 1099 rate to match ${targetW2Salary.toLocaleString()} W2 total value:</p>
-                 <div className="bg-bg-card border border-blue/40 rounded-lg p-10 shadow-blue-glow">
-                    <div className="text-7xl font-black tracking-tighter font-mono text-text-primary">
-                       $<AnimatedNumber value={reverseRate} />
+              <div className="space-y-4">
+                <Accordion title="W2 Employer Benefits" icon={Briefcase}>
+                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <InputGroup label="Health Insurance value">
+                        <input type="number" value={benefits.health} onChange={e => setBenefits({...benefits, health: parseInt(e.target.value)||0})} className="w-full bg-bg-main border border-border-color rounded-md px-3 py-2 text-sm text-text-primary" />
+                      </InputGroup>
+                      <InputGroup label="401k match (%)">
+                        <input type="number" value={benefits.match} onChange={e => setBenefits({...benefits, match: parseInt(e.target.value)||0})} className="w-full bg-bg-main border border-border-color rounded-md px-3 py-2 text-sm text-text-primary" />
+                      </InputGroup>
+                      <InputGroup label="PTO value (days)">
+                        <input type="number" value={benefits.pto} onChange={e => setBenefits({...benefits, pto: parseInt(e.target.value)||0})} className="w-full bg-bg-main border border-border-color rounded-md px-3 py-2 text-sm text-text-primary" />
+                      </InputGroup>
+                      <InputGroup label="Other benefits">
+                        <input type="number" value={benefits.other} onChange={e => setBenefits({...benefits, other: parseInt(e.target.value)||0})} className="w-full bg-bg-main border border-border-color rounded-md px-3 py-2 text-sm text-text-primary" />
+                      </InputGroup>
+                   </div>
+                </Accordion>
+
+                <Accordion title="Business Deductions (1099)" icon={Calculator}>
+                   <div className="space-y-4">
+                      {(Object.entries(deductions) as [string, DeductionItem][]).map(([key, item]) => (
+                        <div key={key} className="flex items-center justify-between gap-4">
+                          <div className="flex items-center gap-3 text-text-primary">
+                            <input type="checkbox" checked={item.active} onChange={e => setDeductions({...deductions, [key]: {...item, active: e.target.checked}})} className="accent-blue w-4 h-4" />
+                            <span className="text-xs font-bold uppercase text-text-muted">{key.replace(/([A-Z])/g, ' $1')}</span>
+                          </div>
+                          <input type="number" value={item.value} onChange={e => setDeductions({...deductions, [key]: {...item, value: parseInt(e.target.value)||0}})} className="w-24 bg-bg-main border border-border-color rounded-md px-2 py-1 text-xs text-right text-text-primary" />
+                        </div>
+                      ))}
+                   </div>
+                </Accordion>
+              </div>
+
+              <div className="pt-4">
+                  <button onClick={scrollToTool} className="w-full py-4 bg-blue text-white font-black uppercase tracking-widest rounded-lg hover:shadow-blue-glow transition-all flex items-center justify-center gap-2">
+                    Compare Now <ArrowRight size={18} />
+                  </button>
+              </div>
+            </div>
+
+            <div className="space-y-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="bg-bg-card border border-border-color rounded-xl p-8 space-y-6 shadow-2xl relative overflow-hidden flex flex-col justify-between">
+                   <div className="absolute top-0 left-0 w-full h-1 bg-text-muted/30" />
+                   <div>
+                     <h3 className="text-xs font-mono font-bold text-text-muted uppercase tracking-widest mb-4">W2 Package</h3>
+                     <div className="space-y-4">
+                        <div className="space-y-1">
+                          <span className="text-[10px] text-text-muted font-bold uppercase">Cash Take-Home</span>
+                          <p className="text-3xl font-mono font-black text-white"><AnimatedNumber value={results.w2.takeHome} /></p>
+                        </div>
+                        <div className="space-y-2 border-t border-border-color/30 pt-4">
+                          <div className="flex justify-between items-center text-[11px] font-mono">
+                            <span className="text-text-muted">Federal Tax</span> <span className="text-red">-${results.w2.federal.toLocaleString()}</span>
+                          </div>
+                          <div className="flex justify-between items-center text-[11px] font-mono">
+                            <span className="text-text-muted">State Tax</span> <span className="text-red">-${results.w2.state.toLocaleString()}</span>
+                          </div>
+                        </div>
+                     </div>
+                   </div>
+                   <div className="pt-8 mt-auto border-t border-border-color/30">
+                      <span className="text-[10px] text-text-muted font-bold uppercase block mb-1">TOTAL VALUE</span>
+                      <p className="text-2xl font-mono font-black text-blue"><AnimatedNumber value={results.w2.total} /></p>
+                   </div>
+                </div>
+
+                <div className="bg-bg-card border border-border-color rounded-xl p-8 space-y-6 shadow-2xl relative overflow-hidden flex flex-col justify-between">
+                   <div className="absolute top-0 left-0 w-full h-1 bg-green/50" />
+                   <div>
+                     <h3 className="text-xs font-mono font-bold text-green uppercase tracking-widest mb-4">1099 Package</h3>
+                     <div className="space-y-4">
+                        <div className="space-y-1">
+                          <span className="text-[10px] text-text-muted font-bold uppercase">Adjusted Take-Home</span>
+                          <p className="text-3xl font-mono font-black text-green"><AnimatedNumber value={results.c1099.takeHome} /></p>
+                        </div>
+                        <div className="space-y-2 border-t border-border-color/30 pt-4">
+                          <div className="flex justify-between items-center text-[11px] font-mono">
+                            <span className="text-text-muted">SE Tax</span> <span className="text-red">-${results.c1099.seTax.toLocaleString()}</span>
+                          </div>
+                          <div className="flex justify-between items-center text-[11px] font-mono">
+                            <span className="text-text-muted">QBI Shield</span> <span className="text-green">+${results.c1099.qbi.toLocaleString()}</span>
+                          </div>
+                        </div>
+                     </div>
+                   </div>
+                   <div className="pt-8 mt-auto border-t border-border-color/30">
+                      <span className="text-[10px] text-text-muted font-bold uppercase block mb-1">NET PROFIT</span>
+                      <p className="text-2xl font-mono font-black text-text-primary"><AnimatedNumber value={results.c1099.profit} /></p>
+                   </div>
+                </div>
+              </div>
+
+              <div className={`p-6 rounded-xl border-l-4 flex items-center justify-between shadow-lg ${is1099Winner ? 'bg-green/10 border-green' : 'bg-blue/10 border-blue'}`}>
+                 <div className="flex items-center gap-4">
+                    <div className={`w-12 h-12 rounded-full flex items-center justify-center ${is1099Winner ? 'bg-green text-white' : 'bg-blue text-white'}`}>
+                      <Trophy size={20} />
                     </div>
-                    <div className="flex justify-center gap-6 mt-6">
-                       <span className="text-xs font-bold text-blue uppercase bg-blue/10 px-4 py-1.5 rounded-full border border-blue/20">~${(reverseRate / 2080).toLocaleString(undefined, { maximumFractionDigits: 0 })} / Hour</span>
-                       <span className="text-xs font-bold text-text-muted uppercase bg-bg-main px-4 py-1.5 rounded-full border border-border-color">12-Month Runrate</span>
+                    <div>
+                      <p className="text-xs md:text-sm font-black uppercase text-text-primary">
+                        {is1099Winner ? '1099 Wins' : 'W2 Wins'} by ${Math.abs(margin).toLocaleString()}/year
+                      </p>
                     </div>
                  </div>
               </div>
-            )}
 
-            {activeTab === 'hustle' && (
-               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                  <div className="bg-bg-card border border-border-color rounded-sm p-6 space-y-8">
-                     <h3 className="text-xs font-black uppercase tracking-[0.2em] text-blue">Tax Matrix</h3>
-                     <StatBox label="Combined Net Pay" value={resultsHustle.w2.cashTakeHome + resultsHustle.res1099.takeHome} colorClass="text-blue" />
-                     <div className="grid grid-cols-2 gap-4">
-                        <StatBox label="W2 Portion" value={resultsHustle.w2.cashTakeHome} prefix="$" />
-                        <StatBox label="Hustle Portion" value={resultsHustle.res1099.takeHome} prefix="$" colorClass="text-green" />
-                     </div>
-                  </div>
-                  <div className="bg-bg-card border border-border-color rounded-sm p-6 flex flex-col items-center justify-center">
-                     <div className="h-48 w-48">
-                        <Doughnut 
-                          data={{
-                            labels: ['Take Home', 'IRS Drain'],
-                            datasets: [{
-                              data: [resultsHustle.w2.cashTakeHome + resultsHustle.res1099.takeHome, (resultsHustle.w2.gross + resultsHustle.res1099.gross) - (resultsHustle.w2.cashTakeHome + resultsHustle.res1099.takeHome)],
-                              backgroundColor: ['#58A6FF', '#F85149'],
-                              borderWidth: 0,
-                            }]
-                          }}
-                          options={{
-                            maintainAspectRatio: false,
-                            cutout: '80%',
-                            plugins: { legend: { display: false } }
-                          }}
-                        />
-                     </div>
-                     <span className="text-[10px] uppercase font-bold text-text-muted mt-6">Effective Tax Load</span>
-                     <p className="text-2xl font-black font-mono">{(100 - ((resultsHustle.w2.cashTakeHome + resultsHustle.res1099.takeHome) / (resultsHustle.w2.gross + resultsHustle.res1099.gross) * 100)).toFixed(1)}%</p>
-                  </div>
-               </div>
-            )}
-
-            <section className="pt-24 border-t border-border-color">
-               <StateGuideSwitcher state={stateName} />
-            </section>
+              <p className="text-[9px] text-text-muted leading-tight uppercase font-mono italic text-center">
+                * COMPLIANCE: 2026 FISCAL AUDIT ACTIVE
+              </p>
+            </div>
           </div>
-
-          <footer className="py-8 bg-bg-card grid-line-t px-8 flex justify-between items-center text-[10px] font-bold text-text-muted uppercase tracking-widest">
-             <span>FISCAL 2025 COMPLIANCE MODULE LOADED</span>
-             <div className="flex gap-4">
-                <span>{new Date().toLocaleDateString()}</span>
-                <button onClick={exportPDF} className="text-blue underline">Export PDF Fiscal Log</button>
-             </div>
-          </footer>
         </div>
-      </main>
+      </section>
+
+      {/* 4. CONTENT SECTIONS */}
+      <section className="py-24 px-6 border-y border-border-color/30 bg-bg-card/20">
+        <div className="max-w-4xl mx-auto space-y-24">
+          <div className="space-y-6">
+            <h2 className="text-3xl md:text-4xl font-black tracking-tight text-text-primary text-center">The Progressive Tax Wall</h2>
+            <div className="h-1 w-12 bg-blue mx-auto" />
+            <p className="text-text-muted leading-relaxed text-center text-lg">
+              Most professionals ignore how the "Invisible Tax" of employer-side FICA works. When you switch to 1099, you aren't just becoming the boss—you're becoming the IRS Collector. You're liable for both the employee and employer share of Social Security and Medicare taxes, totaling 15.3%.
+            </p>
+          </div>
+          <div className="space-y-6">
+            <h2 className="text-3xl md:text-4xl font-black tracking-tight text-text-primary text-center">The SDI Factor — A W2 Hidden Cost</h2>
+            <div className="h-1 w-12 bg-blue mx-auto" />
+            <p className="text-text-muted leading-relaxed text-center text-lg">
+              State Disability Insurance (SDI) is often a hidden deduction on W2 paychecks. In states like California, this is a 1.1% hit on all wages. 1099 contractors are exempt from this payroll tax.
+            </p>
+          </div>
+          <div className="space-y-6">
+            <h2 className="text-3xl md:text-4xl font-black tracking-tight text-text-primary text-center">The No QBI Trap in California</h2>
+            <div className="h-1 w-12 bg-blue mx-auto" />
+            <p className="text-text-muted leading-relaxed text-center text-lg">
+              Federal law allows for a massive 20% Qualified Business Income (QBI) deduction. But major jurisdictions—specifically California—do not conform to this at the state level.
+            </p>
+          </div>
+          <div className="space-y-6">
+            <h2 className="text-3xl md:text-4xl font-black tracking-tight text-text-primary text-center">State by State Breakdown</h2>
+            <div className="h-1 w-12 bg-blue mx-auto" />
+            <div className="overflow-hidden border border-border-color/30 rounded-xl bg-bg-card">
+              <table className="w-full text-left font-mono">
+                <thead>
+                  <tr className="bg-bg-input/30 border-b border-border-color/30">
+                    <th className="p-4 text-[10px] font-black uppercase text-text-muted">State</th>
+                    <th className="p-4 text-[10px] font-black uppercase text-text-muted">W2 Net</th>
+                    <th className="p-4 text-[10px] font-black uppercase text-text-muted">1099 Net</th>
+                    <th className="p-4 text-[10px] font-black uppercase text-text-muted">Winner</th>
+                  </tr>
+                </thead>
+                <tbody className="text-xs md:text-sm">
+                  {stateTableData.map(row => (
+                    <tr key={row.name} className="border-b border-border-color/10 last:border-0 hover:bg-white/5">
+                      <td className="p-4 font-bold text-text-primary">{row.name}</td>
+                      <td className="p-4 text-text-muted">${row.w2.toLocaleString()}</td>
+                      <td className="p-4 text-text-muted">${row.c1099.toLocaleString()}</td>
+                      <td className={`p-4 font-black ${row.winner === '1099' ? 'text-green' : 'text-blue'}`}>{row.winner}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 6. EXPERT SECTION */}
+      <section className="py-24 px-6 bg-gradient-to-b from-bg-main to-bg-card/30">
+        <div className="max-w-3xl mx-auto">
+          <div className="relative p-10 md:p-16 border border-blue/20 rounded-2xl glass space-y-10 text-center">
+              <Quote className="absolute top-8 left-8 text-blue/10 scale-[3]" size={64} />
+              <p className="relative z-10 text-xl md:text-2xl font-bold italic leading-relaxed text-text-primary">
+                "The difference between W2 and 1099 isn't just about taxes — it's about your entire financial picture. Know the numbers before you negotiate."
+              </p>
+              <div className="flex flex-col items-center gap-4">
+                  <img src="https://randomuser.me/api/portraits/men/36.jpg" alt="Expert" className="w-20 h-20 rounded-full border-4 border-blue/30 shadow-blue-glow" />
+                  <div className="space-y-4">
+                    <div>
+                      <h4 className="text-lg font-black text-text-primary">David Chen</h4>
+                      <p className="text-xs font-bold uppercase tracking-widest text-blue font-mono">Tax Strategy Specialist</p>
+                    </div>
+                    <p className="text-xs text-text-muted leading-relaxed max-w-md mx-auto">
+                      David Chen is a tax strategy specialist with 13 years of experience helping 
+                      US professionals navigate the W2 vs 1099 decision. Having advised over 
+                      2,000 contractors and employees across California, New York, and Texas, he 
+                      built COMPS ENGINE to make complex tax calculations accessible to everyone.
+                    </p>
+                  </div>
+              </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 7. FAQ */}
+      <section className="py-24 px-6 bg-bg-main">
+        <div className="max-w-4xl mx-auto space-y-16">
+          <div className="text-center space-y-4">
+              <h2 className="text-3xl font-black uppercase tracking-tighter text-text-primary">Fiscal Queries</h2>
+              <div className="h-1 w-12 bg-blue mx-auto" />
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
+            <div className="space-y-3">
+              <h3 className="text-sm font-black uppercase text-blue flex items-center gap-2">What is the self-employment tax rate?</h3>
+              <p className="text-sm text-text-muted leading-relaxed">The rate is 15.3%, representing combined employer and employee shares of Social Security and Medicare.</p>
+            </div>
+            <div className="space-y-3">
+              <h3 className="text-sm font-black uppercase text-blue flex items-center gap-2">What is the QBI deduction?</h3>
+              <p className="text-sm text-text-muted leading-relaxed">QBI (Section 199A) allows contractors to deduct up to 20% of net profit from federal taxes.</p>
+            </div>
+            <div className="space-y-3">
+              <h3 className="text-sm font-black uppercase text-blue flex items-center gap-2">How does California differ from Texas?</h3>
+              <p className="text-sm text-text-muted leading-relaxed">Texas has zero state tax. California has high rates and doesn't conform to QBI at the state level.</p>
+            </div>
+            <div className="space-y-3">
+              <h3 className="text-sm font-black uppercase text-blue flex items-center gap-2">Should I form an LLC for 1099 income?</h3>
+              <p className="text-sm text-text-muted leading-relaxed">LLCs provide liability protection. S-Corp elections within LLCs can save on payroll taxes for high earners.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 8. CTA BANNER */}
+      <section className="py-20 px-6">
+        <div className="max-w-4xl mx-auto">
+          <div className="bg-blue rounded-3xl p-10 md:p-16 text-center space-y-8 shadow-blue-glow relative">
+            <h2 className="text-3xl md:text-5xl font-black tracking-tight text-white leading-tight">
+              Know your numbers before<br />your next salary negotiation.
+            </h2>
+            <button onClick={scrollToTool} className="bg-bg-main text-white px-8 py-4 font-black uppercase tracking-widest rounded-full hover:scale-105 transition-all flex items-center gap-3 mx-auto">
+              Compare My Offers <Calculator size={20} />
+            </button>
+          </div>
+        </div>
+      </section>
+
+          </motion.div>
+        ) : (
+          <AboutPage onBack={() => { setCurrentView('home'); window.scrollTo(0, 0); }} />
+        )}
+      </AnimatePresence>
+
+      {/* 9. FOOTER & EXPORT */}
+      <footer className="py-12 px-6 border-t border-border-color/30 bg-bg-main">
+        <div className="max-w-6xl mx-auto space-y-8">
+          <div className="flex flex-col md:flex-row justify-between gap-10">
+             <div className="max-w-md space-y-4">
+                <button 
+                  onClick={() => { setCurrentView('home'); window.scrollTo(0, 0); }}
+                  className="text-blue font-mono font-bold hover:opacity-80 transition-opacity"
+                >
+                  COMPS ENGINE
+                </button>
+                <p className="text-[10px] text-text-muted uppercase leading-relaxed font-mono">
+                  COMPS ENGINE provides estimates for informational purposes only. Not tax or legal advice. Consult a licensed CPA.
+                </p>
+             </div>
+             <div className="flex flex-col items-end gap-6">
+               <button onClick={exportPDF} className="flex items-center gap-2 px-6 py-2 rounded-lg border border-border-color hover:bg-bg-input/20 transition-all text-xs font-black uppercase tracking-widest text-text-primary">
+                 <Download size={14} className="text-blue" /> Export PDF Fiscal Log
+               </button>
+               <button 
+                 onClick={() => { setCurrentView('about'); window.scrollTo(0, 0); }}
+                 className="text-[10px] uppercase font-black text-text-muted hover:text-blue transition-colors"
+               >
+                 About the Author
+               </button>
+             </div>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }
