@@ -19,10 +19,14 @@ import {
   Quote,
   Target,
   Shield,
-  Users
+  Users,
+  Menu,
+  X
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import jsPDF from 'jspdf';
+import AboutPageView from './AboutPage';
+import ContactPageView from './ContactPage';
 
 // --- Constants & Data (Updated for 2026 Estimates) ---
 
@@ -215,115 +219,11 @@ const Accordion = ({ title, children, icon: Icon }: any) => {
   );
 };
 
-const AboutPage = ({ onBack }: { onBack: () => void }) => (
-  <motion.div
-    key="about"
-    initial={{ opacity: 0, y: 10 }}
-    animate={{ opacity: 1, y: 0 }}
-    exit={{ opacity: 0, y: -10 }}
-    transition={{ duration: 0.2 }}
-    className="flex-grow"
-  >
-    <section className="py-24 px-6">
-      <div className="max-w-5xl mx-auto space-y-20">
-        <div className="text-center space-y-6">
-          <h1 className="text-5xl md:text-7xl font-black tracking-tighter text-text-primary">About COMPS ENGINE</h1>
-          <p className="text-xl text-text-muted max-w-2xl mx-auto">
-            Making complex tax decisions simple and transparent for every US professional.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-16 items-start">
-          <div className="space-y-8">
-            <div className="relative group">
-              <div className="absolute inset-0 bg-blue/20 blur-3xl rounded-full scale-75 group-hover:scale-90 transition-transform duration-500" />
-              <img 
-                src="https://randomuser.me/api/portraits/men/36.jpg" 
-                alt="David Chen" 
-                className="relative w-full aspect-square object-cover rounded-2xl border-2 border-border-color/30 grayscale hover:grayscale-0 transition-all duration-700"
-              />
-            </div>
-            
-            <div className="p-8 border border-border-color/30 rounded-2xl bg-bg-card/50 space-y-4">
-              <div className="flex items-center gap-3 text-blue">
-                <Target size={20} />
-                <h3 className="font-mono font-bold uppercase tracking-widest text-sm">Mission</h3>
-              </div>
-              <p className="text-lg font-bold text-text-primary italic leading-relaxed">
-                "Making complex tax decisions simple and transparent for every US professional."
-              </p>
-            </div>
-          </div>
-
-          <div className="space-y-12">
-            <div className="space-y-6">
-              <h2 className="text-3xl font-black text-text-primary">Meet David Chen</h2>
-              <p className="text-lg text-text-muted leading-relaxed">
-                David Chen is a tax strategy specialist with 13 years of experience helping 
-                US professionals navigate the W2 vs 1099 decision. Having advised over 
-                2,000 contractors and employees across California, New York, and Texas, he 
-                built COMPS ENGINE to make complex tax calculations accessible to everyone.
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-              {[
-                { label: "13 Years", sub: "Tax Strategy Experience", icon: Shield },
-                { label: "2,000+", sub: "Professionals Advised", icon: Users },
-                { label: "All 50", sub: "US States Covered", icon: Check },
-                { label: "2026", sub: "Tax Compliance Ready", icon: ShieldCheck }
-              ].map((stat, i) => (
-                <div key={i} className="p-6 border border-border-color/20 rounded-xl bg-bg-input/10 space-y-2">
-                  <stat.icon size={20} className="text-blue mb-2" />
-                  <div className="text-2xl font-black text-text-primary font-mono">{stat.label}</div>
-                  <div className="text-[10px] font-bold uppercase tracking-widest text-text-muted">{stat.sub}</div>
-                </div>
-              ))}
-            </div>
-
-            <div className="space-y-8 pt-6 border-t border-border-color/30">
-              <div className="space-y-4">
-                <h3 className="text-xs font-mono font-black text-blue uppercase tracking-widest">Trust Signals</h3>
-                <div className="flex flex-wrap gap-4">
-                  <div className="flex items-center gap-2 text-xs font-bold text-text-muted">
-                    <Check size={14} className="text-green" /> Updated for 2026 tax year
-                  </div>
-                  <div className="flex items-center gap-2 text-xs font-bold text-text-muted">
-                    <Check size={14} className="text-green" /> Not affiliated with the IRS
-                  </div>
-                </div>
-              </div>
-
-              <div className="p-6 rounded-xl bg-red/5 border border-red/20 space-y-2">
-                 <div className="flex items-center gap-2 text-red">
-                    <HelpCircle size={16} />
-                    <span className="text-[10px] font-black uppercase tracking-widest">Disclaimer</span>
-                 </div>
-                 <p className="text-xs text-text-muted leading-relaxed">
-                    COMPS ENGINE provides estimates for informational purposes only. Not tax or legal advice. Consult a licensed CPA for your situation.
-                 </p>
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        <div className="pt-20 text-center">
-           <button 
-             onClick={onBack}
-             className="px-10 py-5 bg-blue text-white font-black uppercase tracking-widest rounded-full hover:scale-105 transition-all shadow-blue-glow inline-flex items-center gap-3"
-           >
-             Back to Calculator <Calculator size={20} />
-           </button>
-        </div>
-      </div>
-    </section>
-  </motion.div>
-);
-
 // --- Main App ---
 
 export default function App() {
-  const [currentView, setCurrentView] = useState<'home' | 'about'>('home');
+  const [currentView, setCurrentView] = useState<'home' | 'about' | 'contact'>('home');
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [status, setStatus] = useState('single');
   const [stateName, setStateName] = useState('California');
   const [w2Salary, setW2Salary] = useState(105000);
@@ -492,6 +392,18 @@ export default function App() {
     doc.save(`COMPS_ENGINE_REPORT_${new Date().toISOString().split('T')[0]}.pdf`);
   };
 
+  const navLinks = [
+    { label: 'Home', view: 'home' as const },
+    { label: 'About', view: 'about' as const },
+    { label: 'Contact', view: 'contact' as const },
+  ];
+
+  const handleNavClick = (view: 'home' | 'about' | 'contact') => {
+    setCurrentView(view);
+    setIsMenuOpen(false);
+    window.scrollTo(0, 0);
+  };
+
   return (
     <div className="flex flex-col min-h-screen bg-bg-main font-sans selection:bg-blue/30 selection:text-white">
       
@@ -499,28 +411,58 @@ export default function App() {
       <nav className="sticky top-0 z-50 glass border-b border-border-color/30 px-6 py-4">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
           <button 
-            onClick={() => { setCurrentView('home'); window.scrollTo(0, 0); }}
+            onClick={() => handleNavClick('home')}
             className="flex items-center gap-2 text-blue font-mono font-bold tracking-tighter hover:opacity-80 transition-opacity"
           >
             <Calculator size={18} />
             <span>COMPS ENGINE</span>
           </button>
           
-          <div className="flex items-center gap-6">
-            <button 
-              onClick={() => { setCurrentView('home'); window.scrollTo(0, 0); }}
-              className={`text-[10px] uppercase font-black tracking-widest transition-colors ${currentView === 'home' ? 'text-blue' : 'text-text-muted hover:text-text-primary'}`}
-            >
-              Calculator
-            </button>
-            <button 
-              onClick={() => { setCurrentView('about'); window.scrollTo(0, 0); }}
-              className={`text-[10px] uppercase font-black tracking-widest transition-colors ${currentView === 'about' ? 'text-blue' : 'text-text-muted hover:text-text-primary'}`}
-            >
-              About
-            </button>
+          {/* Desktop Nav */}
+          <div className="hidden md:flex items-center gap-6">
+            {navLinks.map((link) => (
+              <button 
+                key={link.view}
+                onClick={() => handleNavClick(link.view)}
+                className={`text-[10px] uppercase font-black tracking-widest transition-colors ${currentView === link.view ? 'text-blue' : 'text-text-muted hover:text-text-primary'}`}
+              >
+                {link.label}
+              </button>
+            ))}
           </div>
+
+          {/* Mobile Menu Button */}
+          <button 
+            className="md:hidden text-text-primary"
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+          >
+            {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+          </button>
         </div>
+
+        {/* Mobile Nav */}
+        <AnimatePresence>
+          {isMenuOpen && (
+            <motion.div 
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              className="md:hidden mt-4 overflow-hidden"
+            >
+              <div className="flex flex-col gap-4 pb-4">
+                {navLinks.map((link) => (
+                  <button 
+                    key={link.view}
+                    onClick={() => handleNavClick(link.view)}
+                    className={`text-left text-[10px] uppercase font-black tracking-widest transition-colors ${currentView === link.view ? 'text-blue' : 'text-text-muted hover:text-text-primary'}`}
+                  >
+                    {link.label}
+                  </button>
+                ))}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </nav>
 
       <AnimatePresence mode="wait">
@@ -928,8 +870,10 @@ export default function App() {
             </section>
 
           </motion.div>
+        ) : currentView === 'about' ? (
+          <AboutPageView />
         ) : (
-          <AboutPage onBack={() => { setCurrentView('home'); window.scrollTo(0, 0); }} />
+          <ContactPageView />
         )}
       </AnimatePresence>
 
@@ -939,7 +883,7 @@ export default function App() {
           <div className="flex flex-col md:flex-row justify-between gap-10">
              <div className="max-w-md space-y-4">
                 <button 
-                  onClick={() => { setCurrentView('home'); window.scrollTo(0, 0); }}
+                  onClick={() => handleNavClick('home')}
                   className="text-blue font-mono font-bold hover:opacity-80 transition-opacity"
                 >
                   COMPS ENGINE
@@ -952,12 +896,20 @@ export default function App() {
                <button onClick={exportPDF} className="flex items-center gap-2 px-6 py-2 rounded-lg border border-border-color hover:bg-bg-input/20 transition-all text-xs font-black uppercase tracking-widest text-text-primary">
                  <Download size={14} className="text-blue" /> Export PDF Fiscal Log
                </button>
-               <button 
-                 onClick={() => { setCurrentView('about'); window.scrollTo(0, 0); }}
-                 className="text-[10px] uppercase font-black text-text-muted hover:text-blue transition-colors"
-               >
-                 About the Author
-               </button>
+               <div className="flex gap-4">
+                 <button 
+                   onClick={() => handleNavClick('about')}
+                   className="text-[10px] uppercase font-black text-text-muted hover:text-blue transition-colors"
+                 >
+                   About
+                 </button>
+                 <button 
+                   onClick={() => handleNavClick('contact')}
+                   className="text-[10px] uppercase font-black text-text-muted hover:text-blue transition-colors"
+                 >
+                   Contact
+                 </button>
+               </div>
              </div>
           </div>
         </div>
