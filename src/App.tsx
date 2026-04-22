@@ -17,10 +17,9 @@ import {
   Check,
   HelpCircle,
   Quote,
-  Info,
-  Users,
   Target,
-  Shield
+  Shield,
+  Users
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import jsPDF from 'jspdf';
@@ -449,41 +448,49 @@ export default function App() {
             seTax: seTax,
             qbi: qbi,
             profit: profit,
+            federal: cFedTax,
+            state: cStateTax
         }
     };
   };
 
   const results = useMemo(() => calculateResults(), [status, stateName, w2Salary, contractIncome, benefits, deductions]);
 
-  const margin = results.c1099.takeHome - results.w2.total;
-  const is1099Winner = margin > 0;
+  const stateTableData = useMemo(() => {
+    return ['California', 'Texas', 'New York'].map(name => {
+      const res = calculateResults(name);
+      return {
+        name,
+        w2: res.w2.total,
+        c1099: res.c1099.takeHome,
+        winner: res.c1099.takeHome > res.w2.total ? '1099' : 'W2'
+      };
+    });
+  }, [status, w2Salary, contractIncome, benefits, deductions]);
+
+  const toolRef = useRef<HTMLDivElement>(null);
+  const scrollToTool = () => toolRef.current?.scrollIntoView({ behavior: 'smooth' });
 
   const exportPDF = () => {
     const doc = new jsPDF();
-    doc.setFontSize(22);
-    doc.text("COMPS ENGINE FISCAL LOG", 20, 30);
-    doc.setFontSize(14);
-    doc.text(`Scenario: W2 Salary $${w2Salary.toLocaleString()} vs 1099 Gross $${contractIncome.toLocaleString()}`, 20, 45);
-    doc.text(`Jurisdiction: ${stateName} | Status: ${status}`, 20, 55);
-    doc.text("--------------------------------------------------", 20, 65);
-    doc.text(`W2 Cash Take-Home: $${results.w2.takeHome.toLocaleString()}`, 20, 75);
-    doc.text(`W2 Total Value: $${results.w2.total.toLocaleString()}`, 20, 85);
-    doc.text(`1099 Adjusted Take-Home: $${results.c1099.takeHome.toLocaleString()}`, 20, 95);
-    doc.text(`1099 Net Profit: $${results.c1099.profit.toLocaleString()}`, 20, 105);
-    doc.text(`Margin: $${Math.abs(margin).toLocaleString()} (${is1099Winner ? '1099 Wins' : 'W2 Wins'})`, 20, 115);
-    doc.save("fiscal-log.pdf");
+    doc.setFontSize(20);
+    doc.text("COMPS ENGINE: Fiscal Comparison Report", 20, 20);
+    doc.setFontSize(12);
+    doc.text(`Filing Status: ${status}`, 20, 40);
+    doc.text(`Target State: ${stateName}`, 20, 50);
+    doc.text(`W2 Salary: $${w2Salary.toLocaleString()}`, 20, 60);
+    doc.text(`1099 Gross: $${contractIncome.toLocaleString()}`, 20, 70);
+    
+    doc.text("W2 Results:", 20, 90);
+    doc.text(`Total Value: $${results.w2.total.toLocaleString()}`, 30, 100);
+    doc.text(`Cash Take-Home: $${results.w2.takeHome.toLocaleString()}`, 30, 110);
+    
+    doc.text("1099 Results:", 20, 130);
+    doc.text(`Adjusted Take-Home: $${results.c1099.takeHome.toLocaleString()}`, 30, 140);
+    doc.text(`SE Tax: $${results.c1099.seTax.toLocaleString()}`, 30, 150);
+    
+    doc.save(`COMPS_ENGINE_REPORT_${new Date().toISOString().split('T')[0]}.pdf`);
   };
-
-  const scrollToTool = () => {
-    document.getElementById('tool')?.scrollIntoView({ behavior: 'smooth' });
-  };
-
-  const compareStates = ['California', 'Texas', 'New York'];
-  const stateTableData = compareStates.map(name => {
-    const r = calculateResults(name);
-    const m = r.c1099.takeHome - r.w2.total;
-    return { name, w2: r.w2.total, c1099: r.c1099.takeHome, winner: m > 0 ? '1099' : 'W2' };
-  });
 
   return (
     <div className="flex flex-col min-h-screen bg-bg-main font-sans selection:bg-blue/30 selection:text-white">
@@ -527,378 +534,398 @@ export default function App() {
           >
             {/* 1. HERO SECTION */}
             <section className="relative py-24 md:py-32 px-6 overflow-hidden border-b border-border-color/30">
-        <div className="max-w-5xl mx-auto space-y-8 text-center relative z-10">
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue/10 border border-blue/20 text-blue font-mono text-[10px] md:text-sm font-bold uppercase tracking-widest"
-          >
-            <ShieldCheck size={14} />
-            FISCAL 2026 COMPLIANCE LOADED
-          </motion.div>
-          
-          <motion.h1 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className="text-5xl md:text-7xl font-black tracking-tighter leading-none text-text-primary"
-          >
-            W2 vs 1099 Calculator<br />
-            <span className="text-blue text-glow-blue">See Your True Take-Home Pay</span>
-          </motion.h1>
+              <div className="max-w-5xl mx-auto space-y-8 text-center relative z-10">
+                <motion.div 
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue/10 border border-blue/20 text-blue font-mono text-[10px] md:text-sm font-bold uppercase tracking-widest"
+                >
+                  <ShieldCheck size={14} />
+                  FISCAL 2026 COMPLIANCE LOADED
+                </motion.div>
+                
+                <motion.h1 
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.1 }}
+                  className="text-5xl md:text-7xl font-black tracking-tighter leading-none text-text-primary"
+                >
+                  W2 vs 1099 Calculator<br />
+                  <span className="text-blue text-glow-blue">See Your True Take-Home Pay</span>
+                </motion.h1>
 
-          <motion.p 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="text-lg md:text-xl text-text-muted max-w-2xl mx-auto leading-relaxed"
-          >
-            Compare your salary vs contract income across all 50 states. 
-            Updated for 2026 tax year.
-          </motion.p>
+                <motion.p 
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.2 }}
+                  className="text-lg md:text-xl text-text-muted max-w-2xl mx-auto leading-relaxed"
+                >
+                  Compare your salary vs contract income across all 50 states. 
+                  Updated for 2026 tax year.
+                </motion.p>
 
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            className="flex flex-wrap justify-center gap-4 md:gap-8 pt-8"
-          >
-            <div className="flex items-center gap-2 text-[10px] md:text-sm font-bold text-text-muted">
-              <Check size={16} className="text-green" /> ✓ All 50 US States
-            </div>
-            <div className="flex items-center gap-2 text-[10px] md:text-sm font-bold text-text-muted">
-              <Check size={16} className="text-green" /> ✓ 2026 Tax Rates
-            </div>
-            <div className="flex items-center gap-2 text-[10px] md:text-sm font-bold text-text-muted">
-              <Check size={16} className="text-green" /> ✓ No Signup Required
-            </div>
-            <div className="flex items-center gap-2 text-[10px] md:text-sm font-bold text-text-muted">
-              <Check size={16} className="text-green" /> ✓ Instant Results
-            </div>
-          </motion.div>
-
-          <motion.div 
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.4 }}
-            className="pt-10"
-          >
-            <button 
-                onClick={scrollToTool}
-                className="group relative inline-flex items-center gap-3 px-8 py-4 bg-blue text-white font-black uppercase tracking-widest rounded-full hover:bg-blue/90 transition-all shadow-blue-glow"
-            >
-                Calculate Results <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
-            </button>
-          </motion.div>
-        </div>
-        
-        <div className="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none">
-          <div className="absolute top-[-20%] left-[-10%] w-[60%] h-[60%] bg-blue blur-[120px] rounded-full" />
-          <div className="absolute bottom-[-20%] right-[-10%] w-[50%] h-[50%] bg-green blur-[100px] rounded-full" />
-        </div>
-      </section>
-
-      {/* 2. TOOL SECTION */}
-      <section id="tool" className="py-20 px-6 bg-bg-main relative">
-        <div className="max-w-5xl mx-auto">
-          <div className="text-center space-y-4 mb-16">
-            <h2 className="text-3xl md:text-5xl font-black uppercase tracking-tighter text-text-primary">Compare Offers</h2>
-            <div className="h-1 w-20 bg-blue mx-auto" />
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-            <div className="space-y-10">
-              <div className="space-y-6">
-                <h3 className="text-xs font-mono font-black text-blue uppercase tracking-widest flex items-center gap-2">
-                  <ShieldCheck size={16} /> 01. Core Context
-                </h3>
-                <div className="grid grid-cols-2 gap-4">
-                  <InputGroup label="Filing Status">
-                    <select 
-                      value={status}
-                      onChange={(e) => setStatus(e.target.value)}
-                      className="w-full bg-bg-input border border-border-color rounded-lg px-4 py-3 text-xs md:text-sm text-text-primary outline-none focus:border-blue transition-all"
-                    >
-                      {FILING_STATUSES.map(s => <option key={s.id} value={s.id}>{s.label}</option>)}
-                    </select>
-                  </InputGroup>
-                  <InputGroup label="Target State">
-                    <select 
-                      value={stateName}
-                      onChange={(e) => setStateName(e.target.value)}
-                      className="w-full bg-bg-input border border-border-color rounded-lg px-4 py-3 text-xs md:text-sm text-text-primary outline-none focus:border-blue transition-all"
-                    >
-                      {STATES.map(s => <option key={s.name} value={s.name}>{s.name}</option>)}
-                    </select>
-                  </InputGroup>
-                </div>
-              </div>
-
-              <div className="space-y-6">
-                <h3 className="text-xs font-mono font-black text-blue uppercase tracking-widest flex items-center gap-2">
-                  <TrendingUp size={16} /> 02. Income Comparison
-                </h3>
-                <div className="space-y-6">
-                  <div className="space-y-3">
-                    <div className="flex justify-between items-end">
-                      <label className="text-xs font-bold text-text-muted uppercase">W2 Salary</label>
-                      <span className="text-lg font-mono font-bold text-text-primary">${w2Salary.toLocaleString()}</span>
-                    </div>
-                    <input 
-                      type="range" min="30000" max="600000" step="1000"
-                      value={w2Salary} onChange={(e) => setW2Salary(parseInt(e.target.value))}
-                      className="w-full accent-blue bg-border-color h-2 rounded-full cursor-pointer appearance-none"
-                    />
+                <motion.div 
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.3 }}
+                  className="flex flex-wrap justify-center gap-4 md:gap-8 pt-8"
+                >
+                  <div className="flex items-center gap-2 text-[10px] md:text-sm font-bold text-text-muted">
+                    <Check size={16} className="text-green" /> ✓ All 50 US States
                   </div>
-                  <div className="space-y-3">
-                    <div className="flex justify-between items-end">
-                      <label className="text-xs font-bold text-text-muted uppercase">1099 Gross Income</label>
-                      <span className="text-lg font-mono font-bold text-text-primary text-green">${contractIncome.toLocaleString()}</span>
-                    </div>
-                    <input 
-                      type="range" min="30000" max="600000" step="1000"
-                      value={contractIncome} onChange={(e) => setContractIncome(parseInt(e.target.value))}
-                      className="w-full accent-green bg-border-color h-2 rounded-full cursor-pointer appearance-none"
-                    />
+                  <div className="flex items-center gap-2 text-[10px] md:text-sm font-bold text-text-muted">
+                    <Check size={16} className="text-green" /> ✓ 2026 Tax Rates
                   </div>
-                </div>
-              </div>
+                  <div className="flex items-center gap-2 text-[10px] md:text-sm font-bold text-text-muted">
+                    <Check size={16} className="text-green" /> ✓ No Signup Required
+                  </div>
+                  <div className="flex items-center gap-2 text-[10px] md:text-sm font-bold text-text-muted">
+                    <Check size={16} className="text-green" /> ✓ Instant Results
+                  </div>
+                </motion.div>
 
-              <div className="space-y-4">
-                <Accordion title="W2 Employer Benefits" icon={Briefcase}>
-                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <InputGroup label="Health Insurance value">
-                        <input type="number" value={benefits.health} onChange={e => setBenefits({...benefits, health: parseInt(e.target.value)||0})} className="w-full bg-bg-main border border-border-color rounded-md px-3 py-2 text-sm text-text-primary" />
-                      </InputGroup>
-                      <InputGroup label="401k match (%)">
-                        <input type="number" value={benefits.match} onChange={e => setBenefits({...benefits, match: parseInt(e.target.value)||0})} className="w-full bg-bg-main border border-border-color rounded-md px-3 py-2 text-sm text-text-primary" />
-                      </InputGroup>
-                      <InputGroup label="PTO value (days)">
-                        <input type="number" value={benefits.pto} onChange={e => setBenefits({...benefits, pto: parseInt(e.target.value)||0})} className="w-full bg-bg-main border border-border-color rounded-md px-3 py-2 text-sm text-text-primary" />
-                      </InputGroup>
-                      <InputGroup label="Other benefits">
-                        <input type="number" value={benefits.other} onChange={e => setBenefits({...benefits, other: parseInt(e.target.value)||0})} className="w-full bg-bg-main border border-border-color rounded-md px-3 py-2 text-sm text-text-primary" />
-                      </InputGroup>
-                   </div>
-                </Accordion>
-
-                <Accordion title="Business Deductions (1099)" icon={Calculator}>
-                   <div className="space-y-4">
-                      {(Object.entries(deductions) as [string, DeductionItem][]).map(([key, item]) => (
-                        <div key={key} className="flex items-center justify-between gap-4">
-                          <div className="flex items-center gap-3 text-text-primary">
-                            <input type="checkbox" checked={item.active} onChange={e => setDeductions({...deductions, [key]: {...item, active: e.target.checked}})} className="accent-blue w-4 h-4" />
-                            <span className="text-xs font-bold uppercase text-text-muted">{key.replace(/([A-Z])/g, ' $1')}</span>
-                          </div>
-                          <input type="number" value={item.value} onChange={e => setDeductions({...deductions, [key]: {...item, value: parseInt(e.target.value)||0}})} className="w-24 bg-bg-main border border-border-color rounded-md px-2 py-1 text-xs text-right text-text-primary" />
-                        </div>
-                      ))}
-                   </div>
-                </Accordion>
-              </div>
-
-              <div className="pt-4">
-                  <button onClick={scrollToTool} className="w-full py-4 bg-blue text-white font-black uppercase tracking-widest rounded-lg hover:shadow-blue-glow transition-all flex items-center justify-center gap-2">
-                    Compare Now <ArrowRight size={18} />
+                <motion.div 
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 0.4 }}
+                  className="pt-10"
+                >
+                  <button 
+                      onClick={scrollToTool}
+                      className="group relative inline-flex items-center gap-3 px-8 py-4 bg-blue text-white font-black uppercase tracking-widest rounded-full hover:bg-blue/90 transition-all shadow-blue-glow"
+                  >
+                      Calculate Results <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
                   </button>
+                </motion.div>
               </div>
-            </div>
+              
+              <div className="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none">
+                <div className="absolute top-[-20%] left-[-10%] w-[60%] h-[60%] bg-blue blur-[120px] rounded-full" />
+                <div className="absolute bottom-[-20%] right-[-10%] w-[50%] h-[50%] bg-green blur-[100px] rounded-full" />
+              </div>
+            </section>
 
-            <div className="space-y-8">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="bg-bg-card border border-border-color rounded-xl p-8 space-y-6 shadow-2xl relative overflow-hidden flex flex-col justify-between">
-                   <div className="absolute top-0 left-0 w-full h-1 bg-text-muted/30" />
-                   <div>
-                     <h3 className="text-xs font-mono font-bold text-text-muted uppercase tracking-widest mb-4">W2 Package</h3>
-                     <div className="space-y-4">
-                        <div className="space-y-1">
-                          <span className="text-[10px] text-text-muted font-bold uppercase">Cash Take-Home</span>
-                          <p className="text-3xl font-mono font-black text-white"><AnimatedNumber value={results.w2.takeHome} /></p>
-                        </div>
-                        <div className="space-y-2 border-t border-border-color/30 pt-4">
-                          <div className="flex justify-between items-center text-[11px] font-mono">
-                            <span className="text-text-muted">Federal Tax</span> <span className="text-red">-${results.w2.federal.toLocaleString()}</span>
-                          </div>
-                          <div className="flex justify-between items-center text-[11px] font-mono">
-                            <span className="text-text-muted">State Tax</span> <span className="text-red">-${results.w2.state.toLocaleString()}</span>
-                          </div>
-                        </div>
-                     </div>
+            {/* 2. TOOL SECTION */}
+            <section ref={toolRef} className="py-24 px-6 bg-bg-main relative">
+              <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
+                
+                {/* TOOL INPUTS */}
+                <div className="lg:col-span-12 space-y-12">
+                   <div className="text-center space-y-4">
+                      <h2 className="text-4xl font-black uppercase tracking-tighter text-text-primary">Compare Offers</h2>
+                      <div className="h-1 w-12 bg-blue mx-auto" />
                    </div>
-                   <div className="pt-8 mt-auto border-t border-border-color/30">
-                      <span className="text-[10px] text-text-muted font-bold uppercase block mb-1">TOTAL VALUE</span>
-                      <p className="text-2xl font-mono font-black text-blue"><AnimatedNumber value={results.w2.total} /></p>
+
+                   <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-16">
+                      {/* CORE CONTEXT */}
+                      <div className="space-y-8 p-8 rounded-2xl bg-bg-card/50 border border-border-color/30">
+                        <h3 className="text-xs font-black uppercase tracking-widest text-blue flex items-center gap-2">
+                           <Briefcase size={16} /> Core Context
+                        </h3>
+                        
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                           <InputGroup label="Filing Status">
+                              <select 
+                                value={status} 
+                                onChange={e => setStatus(e.target.value)}
+                                className="w-full bg-bg-input border border-border-color rounded-lg px-4 py-3 text-sm text-text-primary focus:border-blue outline-none transition-all cursor-pointer"
+                              >
+                                {FILING_STATUSES.map(s => <option key={s.id} value={s.id}>{s.label}</option>)}
+                              </select>
+                           </InputGroup>
+                           <InputGroup label="Target State">
+                              <select 
+                                value={stateName} 
+                                onChange={e => setStateName(e.target.value)}
+                                className="w-full bg-bg-input border border-border-color rounded-lg px-4 py-3 text-sm text-text-primary focus:border-blue outline-none transition-all cursor-pointer"
+                              >
+                                {STATES.map(s => <option key={s.name} value={s.name}>{s.name}</option>)}
+                              </select>
+                           </InputGroup>
+                        </div>
+
+                        <div className="space-y-6 pt-4">
+                           <InputGroup label={`W2 Salary: $${w2Salary.toLocaleString()}`}>
+                              <input type="range" min="50000" max="500000" step="1000" value={w2Salary} onChange={e => setW2Salary(parseInt(e.target.value))} className="w-full accent-blue appearance-none bg-blue/10 h-1.5 rounded-full outline-none" />
+                           </InputGroup>
+                           <InputGroup label={`1099 Gross: $${contractIncome.toLocaleString()}`}>
+                              <input type="range" min="50000" max="500000" step="1000" value={contractIncome} onChange={e => setContractIncome(parseInt(e.target.value))} className="w-full accent-green appearance-none bg-green/10 h-1.5 rounded-full outline-none" />
+                           </InputGroup>
+                        </div>
+                      </div>
+
+                      {/* EXTRA INPUTS (ACCORDIONS) */}
+                      <div className="space-y-4">
+                        <Accordion title="W2 Employer Benefits" icon={TrendingUp}>
+                          <div className="space-y-4">
+                            <InputGroup label="Annual Health Premium Value">
+                              <input type="number" value={benefits.health} onChange={e => setBenefits({...benefits, health: parseInt(e.target.value)||0})} className="w-full bg-bg-main border border-border-color rounded-md px-4 py-2 text-sm text-text-primary" />
+                            </InputGroup>
+                            <InputGroup label="401k Match (%)">
+                              <input type="number" value={benefits.match} onChange={e => setBenefits({...benefits, match: parseInt(e.target.value)||0})} className="w-full bg-bg-main border border-border-color rounded-md px-4 py-2 text-sm text-text-primary" />
+                            </InputGroup>
+                            <InputGroup label="Paid Time Off (Days)">
+                              <input type="number" value={benefits.pto} onChange={e => setBenefits({...benefits, pto: parseInt(e.target.value)||0})} className="w-full bg-bg-main border border-border-color rounded-md px-4 py-2 text-sm text-text-primary" />
+                            </InputGroup>
+                          </div>
+                        </Accordion>
+
+                        <Accordion title="Business Deductions (1099)" icon={Calculator}>
+                           <div className="space-y-4">
+                              {(Object.entries(deductions) as [string, DeductionItem][]).map(([key, item]) => (
+                                <div key={key} className="flex items-center justify-between gap-4">
+                                  <div className="flex items-center gap-3 text-text-primary">
+                                    <input type="checkbox" checked={item.active} onChange={e => setDeductions({...deductions, [key]: {...item, active: e.target.checked}})} className="accent-blue w-4 h-4" />
+                                    <span className="text-xs font-bold uppercase text-text-muted">{key.replace(/([A-Z])/g, ' $1')}</span>
+                                  </div>
+                                  <input type="number" value={item.value} onChange={e => setDeductions({...deductions, [key]: {...item, value: parseInt(e.target.value)||0}})} className="w-24 bg-bg-main border border-border-color rounded-md px-2 py-1 text-xs text-right text-text-primary" />
+                                </div>
+                              ))}
+                           </div>
+                        </Accordion>
+                      </div>
                    </div>
                 </div>
 
-                <div className="bg-bg-card border border-border-color rounded-xl p-8 space-y-6 shadow-2xl relative overflow-hidden flex flex-col justify-between">
-                   <div className="absolute top-0 left-0 w-full h-1 bg-green/50" />
-                   <div>
-                     <h3 className="text-xs font-mono font-bold text-green uppercase tracking-widest mb-4">1099 Package</h3>
-                     <div className="space-y-4">
-                        <div className="space-y-1">
-                          <span className="text-[10px] text-text-muted font-bold uppercase">Adjusted Take-Home</span>
-                          <p className="text-3xl font-mono font-black text-green"><AnimatedNumber value={results.c1099.takeHome} /></p>
-                        </div>
-                        <div className="space-y-2 border-t border-border-color/30 pt-4">
-                          <div className="flex justify-between items-center text-[11px] font-mono">
-                            <span className="text-text-muted">SE Tax</span> <span className="text-red">-${results.c1099.seTax.toLocaleString()}</span>
-                          </div>
-                          <div className="flex justify-between items-center text-[11px] font-mono">
-                            <span className="text-text-muted">QBI Shield</span> <span className="text-green">+${results.c1099.qbi.toLocaleString()}</span>
-                          </div>
-                        </div>
-                     </div>
-                   </div>
-                   <div className="pt-8 mt-auto border-t border-border-color/30">
-                      <span className="text-[10px] text-text-muted font-bold uppercase block mb-1">NET PROFIT</span>
-                      <p className="text-2xl font-mono font-black text-text-primary"><AnimatedNumber value={results.c1099.profit} /></p>
+                {/* 3. RESULTS DASHBOARD */}
+                <div className="lg:col-span-12 space-y-12 pt-12">
+                   <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                      {/* W2 RESULTS */}
+                      <motion.div 
+                        initial={{ opacity: 0, x: -20 }}
+                        whileInView={{ opacity: 1, x: 0 }}
+                        className={`p-10 rounded-3xl border-2 transition-all relative overflow-hidden ${results.w2.total > results.c1099.takeHome ? 'border-blue shadow-blue-glow' : 'border-border-color/30 opacity-80'}`}
+                      >
+                         <h4 className="text-xs font-black uppercase text-blue font-mono tracking-widest pb-6 border-b border-border-color/30 mb-8">W2 Package Value</h4>
+                         <div className="space-y-6">
+                            <div className="flex justify-between items-end">
+                               <span className="text-text-muted text-sm font-bold uppercase">Cash Take-Home</span>
+                               <div className="text-3xl font-black text-white font-mono"><AnimatedNumber value={results.w2.takeHome} /></div>
+                            </div>
+                            <div className="space-y-2 border-t border-border-color/30 pt-4">
+                               <div className="flex justify-between text-xs font-bold text-red/80">
+                                  <span>Federal Income Tax</span>
+                                  <span>-<AnimatedNumber value={results.w2.federal} /></span>
+                                </div>
+                                <div className="flex justify-between text-xs font-bold text-red/80">
+                                  <span>State Income Tax</span>
+                                  <span>-<AnimatedNumber value={results.w2.state} /></span>
+                                </div>
+                            </div>
+                            <div className="pt-8 text-center border-t border-border-color/30">
+                               <div className="text-[10px] font-black uppercase text-text-muted tracking-widest mb-1">Total Economic Value</div>
+                               <div className="text-5xl font-black text-blue tracking-tighter"><AnimatedNumber value={results.w2.total} /></div>
+                            </div>
+                         </div>
+                         {results.w2.total > results.c1099.takeHome && (
+                            <div className="absolute top-4 right-4 bg-blue text-white text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest flex items-center gap-1">
+                               <Trophy size={12} /> Winner
+                            </div>
+                         )}
+                      </motion.div>
+
+                      {/* 1099 RESULTS */}
+                      <motion.div 
+                        initial={{ opacity: 0, x: 20 }}
+                        whileInView={{ opacity: 1, x: 0 }}
+                        className={`p-10 rounded-3xl border-2 transition-all relative overflow-hidden ${results.c1099.takeHome > results.w2.total ? 'border-green shadow-blue-glow' : 'border-border-color/30 opacity-80'}`}
+                      >
+                         <h4 className="text-xs font-black uppercase text-green font-mono tracking-widest pb-6 border-b border-border-color/30 mb-8">1099 Adj Take-Home</h4>
+                         <div className="space-y-6">
+                            <div className="flex justify-between items-end">
+                               <span className="text-text-muted text-sm font-bold uppercase">Net After-Tax Profit</span>
+                               <div className="text-3xl font-black text-white font-mono"><AnimatedNumber value={results.c1099.takeHome} /></div>
+                            </div>
+                            <div className="space-y-2 border-t border-border-color/30 pt-4">
+                               <div className="flex justify-between text-xs font-bold text-red/80">
+                                  <span>Self-Employment Tax</span>
+                                  <span>-<AnimatedNumber value={results.c1099.seTax} /></span>
+                                </div>
+                                <div className="flex justify-between text-xs font-bold text-green/80">
+                                  <span>QBI Deduction Shield</span>
+                                  <span>+<AnimatedNumber value={results.c1099.qbi} /></span>
+                                </div>
+                            </div>
+                            <div className="pt-8 text-center border-t border-border-color/30">
+                               <div className="text-[10px] font-black uppercase text-text-muted tracking-widest mb-1">Final Discretionary Cash</div>
+                               <div className="text-5xl font-black text-green tracking-tighter"><AnimatedNumber value={results.c1099.takeHome} /></div>
+                            </div>
+                         </div>
+                         {results.c1099.takeHome > results.w2.total && (
+                            <div className="absolute top-4 right-4 bg-green text-white text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest flex items-center gap-1">
+                               <Trophy size={12} /> Winner
+                            </div>
+                         )}
+                      </motion.div>
                    </div>
                 </div>
+
               </div>
+            </section>
 
-              <div className={`p-6 rounded-xl border-l-4 flex items-center justify-between shadow-lg ${is1099Winner ? 'bg-green/10 border-green' : 'bg-blue/10 border-blue'}`}>
-                 <div className="flex items-center gap-4">
-                    <div className={`w-12 h-12 rounded-full flex items-center justify-center ${is1099Winner ? 'bg-green text-white' : 'bg-blue text-white'}`}>
-                      <Trophy size={20} />
-                    </div>
-                    <div>
-                      <p className="text-xs md:text-sm font-black uppercase text-text-primary">
-                        {is1099Winner ? '1099 Wins' : 'W2 Wins'} by ${Math.abs(margin).toLocaleString()}/year
-                      </p>
-                    </div>
-                 </div>
-              </div>
-
-              <p className="text-[9px] text-text-muted leading-tight uppercase font-mono italic text-center">
-                * COMPLIANCE: 2026 FISCAL AUDIT ACTIVE
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 4. CONTENT SECTIONS */}
-      <section className="py-24 px-6 border-y border-border-color/30 bg-bg-card/20">
-        <div className="max-w-4xl mx-auto space-y-24">
-          <div className="space-y-6">
-            <h2 className="text-3xl md:text-4xl font-black tracking-tight text-text-primary text-center">The Progressive Tax Wall</h2>
-            <div className="h-1 w-12 bg-blue mx-auto" />
-            <p className="text-text-muted leading-relaxed text-center text-lg">
-              Most professionals ignore how the "Invisible Tax" of employer-side FICA works. When you switch to 1099, you aren't just becoming the boss—you're becoming the IRS Collector. You're liable for both the employee and employer share of Social Security and Medicare taxes, totaling 15.3%.
-            </p>
-          </div>
-          <div className="space-y-6">
-            <h2 className="text-3xl md:text-4xl font-black tracking-tight text-text-primary text-center">The SDI Factor — A W2 Hidden Cost</h2>
-            <div className="h-1 w-12 bg-blue mx-auto" />
-            <p className="text-text-muted leading-relaxed text-center text-lg">
-              State Disability Insurance (SDI) is often a hidden deduction on W2 paychecks. In states like California, this is a 1.1% hit on all wages. 1099 contractors are exempt from this payroll tax.
-            </p>
-          </div>
-          <div className="space-y-6">
-            <h2 className="text-3xl md:text-4xl font-black tracking-tight text-text-primary text-center">The No QBI Trap in California</h2>
-            <div className="h-1 w-12 bg-blue mx-auto" />
-            <p className="text-text-muted leading-relaxed text-center text-lg">
-              Federal law allows for a massive 20% Qualified Business Income (QBI) deduction. But major jurisdictions—specifically California—do not conform to this at the state level.
-            </p>
-          </div>
-          <div className="space-y-6">
-            <h2 className="text-3xl md:text-4xl font-black tracking-tight text-text-primary text-center">State by State Breakdown</h2>
-            <div className="h-1 w-12 bg-blue mx-auto" />
-            <div className="overflow-hidden border border-border-color/30 rounded-xl bg-bg-card">
-              <table className="w-full text-left font-mono">
-                <thead>
-                  <tr className="bg-bg-input/30 border-b border-border-color/30">
-                    <th className="p-4 text-[10px] font-black uppercase text-text-muted">State</th>
-                    <th className="p-4 text-[10px] font-black uppercase text-text-muted">W2 Net</th>
-                    <th className="p-4 text-[10px] font-black uppercase text-text-muted">1099 Net</th>
-                    <th className="p-4 text-[10px] font-black uppercase text-text-muted">Winner</th>
-                  </tr>
-                </thead>
-                <tbody className="text-xs md:text-sm">
-                  {stateTableData.map(row => (
-                    <tr key={row.name} className="border-b border-border-color/10 last:border-0 hover:bg-white/5">
-                      <td className="p-4 font-bold text-text-primary">{row.name}</td>
-                      <td className="p-4 text-text-muted">${row.w2.toLocaleString()}</td>
-                      <td className="p-4 text-text-muted">${row.c1099.toLocaleString()}</td>
-                      <td className={`p-4 font-black ${row.winner === '1099' ? 'text-green' : 'text-blue'}`}>{row.winner}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 6. EXPERT SECTION */}
-      <section className="py-24 px-6 bg-gradient-to-b from-bg-main to-bg-card/30">
-        <div className="max-w-3xl mx-auto">
-          <div className="relative p-10 md:p-16 border border-blue/20 rounded-2xl glass space-y-10 text-center">
-              <Quote className="absolute top-8 left-8 text-blue/10 scale-[3]" size={64} />
-              <p className="relative z-10 text-xl md:text-2xl font-bold italic leading-relaxed text-text-primary">
-                "The difference between W2 and 1099 isn't just about taxes — it's about your entire financial picture. Know the numbers before you negotiate."
-              </p>
-              <div className="flex flex-col items-center gap-4">
-                  <img src="https://randomuser.me/api/portraits/men/36.jpg" alt="Expert" className="w-20 h-20 rounded-full border-4 border-blue/30 shadow-blue-glow" />
-                  <div className="space-y-4">
-                    <div>
-                      <h4 className="text-lg font-black text-text-primary">David Chen</h4>
-                      <p className="text-xs font-bold uppercase tracking-widest text-blue font-mono">Tax Strategy Specialist</p>
-                    </div>
-                    <p className="text-xs text-text-muted leading-relaxed max-w-md mx-auto">
-                      David Chen is a tax strategy specialist with 13 years of experience helping 
-                      US professionals navigate the W2 vs 1099 decision. Having advised over 
-                      2,000 contractors and employees across California, New York, and Texas, he 
-                      built COMPS ENGINE to make complex tax calculations accessible to everyone.
+            {/* 4. CONTENT SECTIONS */}
+            <section className="py-24 px-6 bg-bg-card/20 border-y border-border-color/30">
+              <div className="max-w-6xl mx-auto space-y-32">
+                
+                {/* POINT 1 */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
+                  <div className="space-y-8">
+                    <h2 className="text-4xl md:text-5xl font-black tracking-tighter text-text-primary leading-none">
+                      The Progressive<br /><span className="text-blue">Tax Wall</span>
+                    </h2>
+                    <p className="text-lg text-text-muted leading-relaxed">
+                      As your income grows, each additional dollar is taxed at a higher rate. COMPS ENGINE captures the exact math of federal and state brackets for 2026, ensuring you know where your next raise actually lands.
                     </p>
+                    <div className="flex items-center gap-4 p-6 bg-bg-input/20 border border-border-color/30 rounded-xl">
+                       <HelpCircle className="text-blue shrink-0" />
+                       <p className="text-xs font-mono font-bold uppercase tracking-widest text-text-muted">Pro Tip: 1099 earners can bypass some layers through QBI deduction.</p>
+                    </div>
                   </div>
+                  <div className="p-10 bg-bg-main border border-border-color/30 shadow-2xl rounded-3xl">
+                     <div className="space-y-6">
+                        <div className="h-4 w-full bg-blue/20 rounded-full overflow-hidden"><div className="h-full bg-blue w-1/4" /></div>
+                        <div className="h-4 w-full bg-blue/20 rounded-full overflow-hidden"><div className="h-full bg-blue w-2/3" /></div>
+                        <div className="h-4 w-full bg-blue/20 rounded-full overflow-hidden"><div className="h-full bg-blue w-full" /></div>
+                        <div className="pt-4 flex justify-between text-[10px] font-mono font-bold text-text-muted uppercase">
+                           <span>12%</span><span>22%</span><span>24%</span><span>35%</span>
+                        </div>
+                     </div>
+                  </div>
+                </div>
+
+                {/* POINT 2 */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
+                  <div className="order-2 md:order-1 p-10 bg-bg-main border border-border-color/30 shadow-2xl rounded-3xl">
+                     <div className="flex flex-col gap-4">
+                        {[1,2,3,4,5].map(i => (
+                           <div key={i} className={`h-12 border border-border-color/30 rounded-lg p-3 flex justify-between items-center ${i==1?'bg-red/10 border-red/30':''}`}>
+                              <span className="text-xs font-bold text-text-muted">Benefit Line {i}</span>
+                              <span className="text-sm font-black text-white">$1,200</span>
+                           </div>
+                        ))}
+                     </div>
+                  </div>
+                  <div className="order-1 md:order-2 space-y-8">
+                    <h2 className="text-4xl md:text-5xl font-black tracking-tighter text-text-primary leading-none">
+                      The "SDI Factor"<br /><span className="text-green">In California</span>
+                    </h2>
+                    <p className="text-lg text-text-muted leading-relaxed">
+                      W2 workers in California face an automatic 1.1% SDI deduction that contractors can skip. At high incomes, this is a multi-thousand dollar swing that most generic calculators completely ignore.
+                    </p>
+                    <div className="flex items-center gap-4 p-6 bg-bg-input/20 border border-border-color/30 rounded-xl">
+                       <Check className="text-green shrink-0" />
+                       <p className="text-xs font-mono font-bold uppercase tracking-widest text-text-muted">COMPS ENGINE handles state-specific conformity logic automatically.</p>
+                    </div>
+                  </div>
+                </div>
               </div>
-          </div>
-        </div>
-      </section>
+            </section>
 
-      {/* 7. FAQ */}
-      <section className="py-24 px-6 bg-bg-main">
-        <div className="max-w-4xl mx-auto space-y-16">
-          <div className="text-center space-y-4">
-              <h2 className="text-3xl font-black uppercase tracking-tighter text-text-primary">Fiscal Queries</h2>
-              <div className="h-1 w-12 bg-blue mx-auto" />
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
-            <div className="space-y-3">
-              <h3 className="text-sm font-black uppercase text-blue flex items-center gap-2">What is the self-employment tax rate?</h3>
-              <p className="text-sm text-text-muted leading-relaxed">The rate is 15.3%, representing combined employer and employee shares of Social Security and Medicare.</p>
-            </div>
-            <div className="space-y-3">
-              <h3 className="text-sm font-black uppercase text-blue flex items-center gap-2">What is the QBI deduction?</h3>
-              <p className="text-sm text-text-muted leading-relaxed">QBI (Section 199A) allows contractors to deduct up to 20% of net profit from federal taxes.</p>
-            </div>
-            <div className="space-y-3">
-              <h3 className="text-sm font-black uppercase text-blue flex items-center gap-2">How does California differ from Texas?</h3>
-              <p className="text-sm text-text-muted leading-relaxed">Texas has zero state tax. California has high rates and doesn't conform to QBI at the state level.</p>
-            </div>
-            <div className="space-y-3">
-              <h3 className="text-sm font-black uppercase text-blue flex items-center gap-2">Should I form an LLC for 1099 income?</h3>
-              <p className="text-sm text-text-muted leading-relaxed">LLCs provide liability protection. S-Corp elections within LLCs can save on payroll taxes for high earners.</p>
-            </div>
-          </div>
-        </div>
-      </section>
+            {/* 5. STATE COMPARISON TABLE */}
+            <section className="py-24 px-6 bg-bg-main overflow-x-auto">
+              <div className="max-w-6xl mx-auto space-y-12">
+                <div className="text-center space-y-4">
+                  <h2 className="text-3xl font-black uppercase tracking-tighter text-text-primary">State Comparison</h2>
+                  <div className="h-1 w-12 bg-blue mx-auto" />
+                </div>
+                
+                <div className="bg-bg-card/50 border border-border-color/30 rounded-3xl overflow-hidden shadow-2xl min-w-[600px]">
+                  <table className="w-full text-left">
+                    <thead className="bg-bg-input/20 border-b border-border-color/30">
+                      <tr>
+                        <th className="p-4 text-[10px] font-black uppercase tracking-widest text-blue">Jurisdiction</th>
+                        <th className="p-4 text-[10px] font-black uppercase tracking-widest text-text-muted">W2 Tot Value</th>
+                        <th className="p-4 text-[10px] font-black uppercase tracking-widest text-text-muted">1099 Adj Net</th>
+                        <th className="p-4 text-[10px] font-black uppercase tracking-widest text-text-muted">Winner</th>
+                      </tr>
+                    </thead>
+                    <tbody className="text-xs md:text-sm">
+                      {stateTableData.map(row => (
+                        <tr key={row.name} className="border-b border-border-color/10 last:border-0 hover:bg-white/5">
+                          <td className="p-4 font-bold text-text-primary">{row.name}</td>
+                          <td className="p-4 text-text-muted">${row.w2.toLocaleString()}</td>
+                          <td className="p-4 text-text-muted">${row.c1099.toLocaleString()}</td>
+                          <td className="p-4">
+                            <span className={`px-3 py-1 rounded-full font-black uppercase text-[10px] ${row.winner === 'W2' ? 'bg-blue/10 text-blue' : 'bg-green/10 text-green'}`}>
+                              {row.winner}
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </section>
 
-      {/* 8. CTA BANNER */}
-      <section className="py-20 px-6">
-        <div className="max-w-4xl mx-auto">
-          <div className="bg-blue rounded-3xl p-10 md:p-16 text-center space-y-8 shadow-blue-glow relative">
-            <h2 className="text-3xl md:text-5xl font-black tracking-tight text-white leading-tight">
-              Know your numbers before<br />your next salary negotiation.
-            </h2>
-            <button onClick={scrollToTool} className="bg-bg-main text-white px-8 py-4 font-black uppercase tracking-widest rounded-full hover:scale-105 transition-all flex items-center gap-3 mx-auto">
-              Compare My Offers <Calculator size={20} />
-            </button>
-          </div>
-        </div>
-      </section>
+            {/* 6. EXPERT SECTION */}
+            <section className="py-24 px-6 bg-gradient-to-b from-bg-main to-bg-card/30">
+              <div className="max-w-3xl mx-auto">
+                <div className="relative p-10 md:p-16 border border-blue/20 rounded-2xl glass space-y-10 text-center">
+                    <Quote className="absolute top-8 left-8 text-blue/10 scale-[3]" size={64} />
+                    <p className="relative z-10 text-xl md:text-2xl font-bold italic leading-relaxed text-text-primary">
+                      "The difference between W2 and 1099 isn't just about taxes — it's about your entire financial picture. Know the numbers before you negotiate."
+                    </p>
+                    <div className="flex flex-col items-center gap-4">
+                        <img src="https://randomuser.me/api/portraits/men/36.jpg" alt="Expert" className="w-20 h-20 rounded-full border-4 border-blue/30 shadow-blue-glow" />
+                        <div className="space-y-4">
+                          <div>
+                            <h4 className="text-lg font-black text-text-primary">David Chen</h4>
+                            <p className="text-xs font-bold uppercase tracking-widest text-blue font-mono">Tax Strategy Specialist</p>
+                          </div>
+                          <p className="text-xs text-text-muted leading-relaxed max-w-md mx-auto">
+                            David Chen is a tax strategy specialist with 13 years of experience helping 
+                            US professionals navigate the W2 vs 1099 decision. Having advised over 
+                            2,000 contractors and employees across California, New York, and Texas, he 
+                            built COMPS ENGINE to make complex tax calculations accessible to everyone.
+                          </p>
+                        </div>
+                    </div>
+                </div>
+              </div>
+            </section>
+
+            {/* 7. FAQ */}
+            <section className="py-24 px-6 bg-bg-main">
+              <div className="max-w-4xl mx-auto space-y-16">
+                <div className="text-center space-y-4">
+                    <h2 className="text-3xl font-black uppercase tracking-tighter text-text-primary">Fiscal Queries</h2>
+                    <div className="h-1 w-12 bg-blue mx-auto" />
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
+                  <div className="space-y-3">
+                    <h3 className="text-sm font-black uppercase text-blue flex items-center gap-2">What is the self-employment tax rate?</h3>
+                    <p className="text-sm text-text-muted leading-relaxed">The rate is 15.3%, representing combined employer and employee shares of Social Security and Medicare.</p>
+                  </div>
+                  <div className="space-y-3">
+                    <h3 className="text-sm font-black uppercase text-blue flex items-center gap-2">What is the QBI deduction?</h3>
+                    <p className="text-sm text-text-muted leading-relaxed">QBI (Section 199A) allows contractors to deduct up to 20% of net profit from federal taxes.</p>
+                  </div>
+                  <div className="space-y-3">
+                    <h3 className="text-sm font-black uppercase text-blue flex items-center gap-2">How does California differ from Texas?</h3>
+                    <p className="text-sm text-text-muted leading-relaxed">Texas has zero state tax. California has high rates and doesn't conform to QBI at the state level.</p>
+                  </div>
+                  <div className="space-y-3">
+                    <h3 className="text-sm font-black uppercase text-blue flex items-center gap-2">Should I form an LLC for 1099 income?</h3>
+                    <p className="text-sm text-text-muted leading-relaxed">LLCs provide liability protection. S-Corp elections within LLCs can save on payroll taxes for high earners.</p>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            {/* 8. CTA BANNER */}
+            <section className="py-20 px-6">
+              <div className="max-w-4xl mx-auto">
+                <div className="bg-blue rounded-3xl p-10 md:p-16 text-center space-y-8 shadow-blue-glow relative">
+                  <h2 className="text-3xl md:text-5xl font-black tracking-tight text-white leading-tight">
+                    Know your numbers before<br />your next salary negotiation.
+                  </h2>
+                  <button onClick={scrollToTool} className="bg-bg-main text-white px-8 py-4 font-black uppercase tracking-widest rounded-full hover:scale-105 transition-all flex items-center gap-3 mx-auto">
+                    Compare My Offers <Calculator size={20} />
+                  </button>
+                </div>
+              </div>
+            </section>
 
           </motion.div>
         ) : (
