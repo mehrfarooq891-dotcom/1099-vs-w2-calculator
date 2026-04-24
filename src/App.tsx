@@ -224,6 +224,26 @@ const Accordion = ({ title, children, icon: Icon }: any) => {
 export default function App() {
   const [currentView, setCurrentView] = useState<'home' | 'about' | 'contact'>('home');
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  useEffect(() => {
+    let title = "W2 vs 1099 Calculator | US Salary vs Contract Comparison";
+    let description = "Calculate and compare your W2 salary vs 1099 contract income with our free US tax tool. Updated for 2026 tax year.";
+
+    if (currentView === 'about') {
+      title = "About | W2 vs 1099 Calculator";
+      description = "Learn more about the W2 vs 1099 Calculator, why we built it, and how it helps US professionals make better fiscal decisions.";
+    } else if (currentView === 'contact') {
+      title = "Contact Us | W2 vs 1099 Calculator";
+      description = "Have questions or feedback? Contact the team behind the W2 vs 1099 Calculator.";
+    }
+
+    document.title = title;
+    const metaDesc = document.querySelector('meta[name="description"]');
+    if (metaDesc) {
+      metaDesc.setAttribute("content", description);
+    }
+  }, [currentView]);
+
   const [status, setStatus] = useState('single');
   const [stateName, setStateName] = useState('California');
   const [w2Salary, setW2Salary] = useState(105000);
@@ -374,7 +394,7 @@ export default function App() {
   const exportPDF = () => {
     const doc = new jsPDF();
     doc.setFontSize(20);
-    doc.text("COMPS ENGINE: Fiscal Comparison Report", 20, 20);
+    doc.text("W2 vs 1099 Calculator: Fiscal Comparison Report", 20, 20);
     doc.setFontSize(12);
     doc.text(`Filing Status: ${status}`, 20, 40);
     doc.text(`Target State: ${stateName}`, 20, 50);
@@ -389,7 +409,7 @@ export default function App() {
     doc.text(`Adjusted Take-Home: $${results.c1099.takeHome.toLocaleString()}`, 30, 140);
     doc.text(`SE Tax: $${results.c1099.seTax.toLocaleString()}`, 30, 150);
     
-    doc.save(`COMPS_ENGINE_REPORT_${new Date().toISOString().split('T')[0]}.pdf`);
+    doc.save(`W2_VS_1099_REPORT_${new Date().toISOString().split('T')[0]}.pdf`);
   };
 
   const navLinks = [
@@ -412,10 +432,10 @@ export default function App() {
         <div className="max-w-6xl mx-auto flex items-center justify-between">
           <button 
             onClick={() => handleNavClick('home')}
-            className="flex items-center gap-2 text-blue font-mono font-bold tracking-tighter hover:opacity-80 transition-opacity"
+            className="flex items-center gap-2 text-blue font-mono font-bold tracking-tighter hover:opacity-80 transition-opacity whitespace-nowrap shrink-0"
           >
             <Calculator size={18} />
-            <span>COMPS ENGINE</span>
+            <span className="whitespace-nowrap">W2 vs 1099 Calculator</span>
           </button>
           
           {/* Desktop Nav */}
@@ -819,7 +839,7 @@ export default function App() {
                             David Chen is a tax strategy specialist with 13 years of experience helping 
                             US professionals navigate the W2 vs 1099 decision. Having advised over 
                             2,000 contractors and employees across California, New York, and Texas, he 
-                            built COMPS ENGINE to make complex tax calculations accessible to everyone.
+                            built W2 vs 1099 Calculator to make complex tax calculations accessible to everyone.
                           </p>
                         </div>
                     </div>
@@ -886,10 +906,10 @@ export default function App() {
                   onClick={() => handleNavClick('home')}
                   className="text-blue font-mono font-bold hover:opacity-80 transition-opacity"
                 >
-                  COMPS ENGINE
+                  W2 vs 1099 Calculator
                 </button>
                 <p className="text-[10px] text-text-muted uppercase leading-relaxed font-mono">
-                  COMPS ENGINE provides estimates for informational purposes only. Not tax or legal advice. Consult a licensed CPA.
+                  W2 vs 1099 Calculator provides estimates for informational purposes only. Not tax or legal advice. Consult a licensed CPA.
                 </p>
              </div>
              <div className="flex flex-col items-end gap-6">

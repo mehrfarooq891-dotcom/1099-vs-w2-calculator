@@ -93,7 +93,7 @@ const ContactPage = () => {
           {/* Section 4 — SEO text */}
           <div className="pt-12 border-t border-border-color/30 text-center">
             <p className="text-xs text-text-muted font-mono uppercase tracking-widest">
-              Contact the team behind COMPS ENGINE — a free US W2 vs 1099 tax calculator for USA.
+              Contact the team behind W2 vs 1099 Calculator — a free US W2 vs 1099 tax calculator for USA.
             </p>
           </div>
         </div>
