@@ -758,14 +758,20 @@ export default function App() {
                 {/* POINT 2 */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
                   <div className="order-2 md:order-1 p-10 bg-bg-main border border-border-color/30 shadow-2xl rounded-3xl">
-                     <div className="flex flex-col gap-4">
-                        {[1,2,3,4,5].map(i => (
-                           <div key={i} className={`h-12 border border-border-color/30 rounded-lg p-3 flex justify-between items-center ${i==1?'bg-red/10 border-red/30':''}`}>
-                              <span className="text-xs font-bold text-text-muted">Benefit Line {i}</span>
+                      <div className="flex flex-col gap-4">
+                        {[
+                          "Health Insurance",
+                          "401(k) Match",
+                          "Paid Time Off",
+                          "Life Insurance",
+                          "Dental & Vision"
+                        ].map((benefit, i) => (
+                           <div key={benefit} className={`h-12 border border-border-color/30 rounded-lg p-3 flex justify-between items-center ${i==0?'bg-red/10 border-red/30':''}`}>
+                              <span className="text-xs font-bold text-text-muted">{benefit}</span>
                               <span className="text-sm font-black text-white">$1,200</span>
                            </div>
                         ))}
-                     </div>
+                      </div>
                   </div>
                   <div className="order-1 md:order-2 space-y-8">
                     <h2 className="text-4xl md:text-5xl font-black tracking-tighter text-text-primary leading-none">
