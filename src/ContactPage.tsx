@@ -86,7 +86,7 @@ const ContactPage = () => {
           <div className="p-8 border border-border-color/20 rounded-2xl bg-bg-input/10 flex items-center justify-center gap-4 text-center">
             <Mail className="text-blue shrink-0" size={24} />
             <p className="text-lg font-bold text-text-primary">
-              Prefer email? Write to us at: <a href="mailto:contact@toolsvault.com" className="text-blue hover:underline">contact@toolsvault.com</a>
+              Prefer email? Write to us at: <a href="mailto:contact@w2vs1099calculator.com" className="text-blue hover:underline">contact@w2vs1099calculator.com</a>
             </p>
           </div>
 

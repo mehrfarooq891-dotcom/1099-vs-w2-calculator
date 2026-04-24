@@ -736,7 +736,7 @@ export default function App() {
                       The Progressive<br /><span className="text-blue">Tax Wall</span>
                     </h2>
                     <p className="text-lg text-text-muted leading-relaxed">
-                      As your income grows, each additional dollar is taxed at a higher rate. COMPS ENGINE captures the exact math of federal and state brackets for 2026, ensuring you know where your next raise actually lands.
+                      As your income grows, each additional dollar is taxed at a higher rate. our calculator captures the exact math of federal and state brackets for 2026, ensuring you know where your next raise actually lands.
                     </p>
                     <div className="flex items-center gap-4 p-6 bg-bg-input/20 border border-border-color/30 rounded-xl">
                        <HelpCircle className="text-blue shrink-0" />
@@ -776,7 +776,7 @@ export default function App() {
                     </p>
                     <div className="flex items-center gap-4 p-6 bg-bg-input/20 border border-border-color/30 rounded-xl">
                        <Check className="text-green shrink-0" />
-                       <p className="text-xs font-mono font-bold uppercase tracking-widest text-text-muted">COMPS ENGINE handles state-specific conformity logic automatically.</p>
+                       <p className="text-xs font-mono font-bold uppercase tracking-widest text-text-muted">our calculator handles state-specific conformity logic automatically.</p>
                     </div>
                   </div>
                 </div>
@@ -805,8 +805,8 @@ export default function App() {
                       {stateTableData.map(row => (
                         <tr key={row.name} className="border-b border-border-color/10 last:border-0 hover:bg-white/5">
                           <td className="p-4 font-bold text-text-primary">{row.name}</td>
-                          <td className="p-4 text-text-muted">${row.w2.toLocaleString()}</td>
-                          <td className="p-4 text-text-muted">${row.c1099.toLocaleString()}</td>
+                          <td className="p-4 text-text-muted">${row.w2.toLocaleString(undefined, { maximumFractionDigits: 2 })}</td>
+                          <td className="p-4 text-text-muted">${row.c1099.toLocaleString(undefined, { maximumFractionDigits: 2 })}</td>
                           <td className="p-4">
                             <span className={`px-3 py-1 rounded-full font-black uppercase text-[10px] ${row.winner === 'W2' ? 'bg-blue/10 text-blue' : 'bg-green/10 text-green'}`}>
                               {row.winner}
@@ -829,7 +829,7 @@ export default function App() {
                       "The difference between W2 and 1099 isn't just about taxes — it's about your entire financial picture. Know the numbers before you negotiate."
                     </p>
                     <div className="flex flex-col items-center gap-4">
-                        <img src="https://randomuser.me/api/portraits/men/36.jpg" alt="Expert" className="w-20 h-20 rounded-full border-4 border-blue/30 shadow-blue-glow" />
+                        <img src="https://i.postimg.cc/VkP82Z6q/David-Chen.png" alt="Expert" className="w-20 h-20 rounded-full border-4 border-blue/30 shadow-blue-glow" />
                         <div className="space-y-4">
                           <div>
                             <h4 className="text-lg font-black text-text-primary">David Chen</h4>
@@ -851,7 +851,7 @@ export default function App() {
             <section className="py-24 px-6 bg-bg-main">
               <div className="max-w-4xl mx-auto space-y-16">
                 <div className="text-center space-y-4">
-                    <h2 className="text-3xl font-black uppercase tracking-tighter text-text-primary">Fiscal Queries</h2>
+                    <h2 className="text-3xl font-black uppercase tracking-tighter text-text-primary">Frequently Asked Questions</h2>
                     <div className="h-1 w-12 bg-blue mx-auto" />
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
