@@ -58,6 +58,28 @@ const AboutPage = () => {
             </div>
           </div>
 
+          {/* Section 5 — Our Expert */}
+          <div className="p-10 border border-blue/20 rounded-3xl bg-blue/5 space-y-8">
+            <div className="flex flex-col md:flex-row items-center gap-10">
+              <img 
+                src="https://i.postimg.cc/VkP82Z6q/David-Chen.png" 
+                alt="David Chen" 
+                className="w-32 h-32 rounded-full border-4 border-blue/30 shadow-blue-glow object-cover" 
+              />
+              <div className="flex-grow space-y-4 text-center md:text-left">
+                <h2 className="text-3xl font-black text-text-primary">Our Expert: David Chen</h2>
+                <div className="flex flex-wrap justify-center md:justify-start gap-4">
+                  <div className="px-3 py-1 bg-blue text-white text-[10px] font-black uppercase tracking-widest rounded-full">Texas CPA #CP28847</div>
+                  <div className="px-3 py-1 bg-border-color/30 text-text-muted text-[10px] font-black uppercase tracking-widest rounded-full">AICPA Member</div>
+                  <div className="px-3 py-1 bg-border-color/30 text-text-muted text-[10px] font-black uppercase tracking-widest rounded-full">Based in Dallas, TX</div>
+                </div>
+                <p className="text-lg text-text-muted leading-relaxed">
+                  With over 13 years of tax strategy experience, David leads the fiscal logic behind our calculator. His goal is to provide every US worker with the same high-level deal analysis usually reserved for corporate executives.
+                </p>
+              </div>
+            </div>
+          </div>
+
           {/* Section 5 — Small SEO text */}
           <div className="pt-12 border-t border-border-color/30 text-center">
             <p className="text-xs text-text-muted font-mono uppercase tracking-widest">

@@ -917,6 +917,10 @@ export default function App() {
                 <p className="text-[10px] text-text-muted uppercase leading-relaxed font-mono">
                   W2 vs 1099 Calculator provides estimates for informational purposes only. Not tax or legal advice. Consult a licensed CPA.
                 </p>
+                <div className="pt-2 space-y-1">
+                  <p className="text-[10px] text-text-muted uppercase tracking-widest font-mono">1999 Bryan St, Suite 900, Dallas, TX 75201</p>
+                  <p className="text-[10px] text-text-muted uppercase tracking-widest font-mono">(214) 555-0183 | contact@w2vs1099calculator.com</p>
+                </div>
              </div>
              <div className="flex flex-col items-end gap-6">
                <button onClick={exportPDF} className="flex items-center gap-2 px-6 py-2 rounded-lg border border-border-color hover:bg-bg-input/20 transition-all text-xs font-black uppercase tracking-widest text-text-primary">
