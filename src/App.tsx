@@ -27,6 +27,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import jsPDF from 'jspdf';
 import AboutPageView from './AboutPage';
 import ContactPageView from './ContactPage';
+import BlogPageView from './BlogPage';
 
 // --- Constants & Data (Updated for 2026 Estimates) ---
 
@@ -222,14 +223,17 @@ const Accordion = ({ title, children, icon: Icon }: any) => {
 // --- Main App ---
 
 export default function App() {
-  const [currentView, setCurrentView] = useState<'home' | 'about' | 'contact'>('home');
+  const [currentView, setCurrentView] = useState<'home' | 'about' | 'contact' | 'blog'>('home');
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   useEffect(() => {
     let title = "W2 vs 1099 Calculator | US Salary vs Contract Comparison";
     let description = "Calculate and compare your W2 salary vs 1099 contract income with our free US tax tool. Updated for 2026 tax year.";
 
-    if (currentView === 'about') {
+    if (currentView === 'blog') {
+      title = "Self-Employment Tax Rate 2025: Guide for 1099 Workers";
+      description = "What do 1099 contract workers actually pay in self-employment tax? Detailed breakdowns, the 92.35% rule, and 2025 examples.";
+    } else if (currentView === 'about') {
       title = "About | W2 vs 1099 Calculator";
       description = "Learn more about the W2 vs 1099 Calculator, why we built it, and how it helps US professionals make better fiscal decisions.";
     } else if (currentView === 'contact') {
@@ -414,11 +418,12 @@ export default function App() {
 
   const navLinks = [
     { label: 'Home', view: 'home' as const },
+    { label: 'Tax Guide 2025', view: 'blog' as const },
     { label: 'About', view: 'about' as const },
     { label: 'Contact', view: 'contact' as const },
   ];
 
-  const handleNavClick = (view: 'home' | 'about' | 'contact') => {
+  const handleNavClick = (view: 'home' | 'about' | 'contact' | 'blog') => {
     setCurrentView(view);
     setIsMenuOpen(false);
     window.scrollTo(0, 0);
@@ -896,6 +901,8 @@ export default function App() {
             </section>
 
           </motion.div>
+        ) : currentView === 'blog' ? (
+          <BlogPageView handleNavClick={handleNavClick} />
         ) : currentView === 'about' ? (
           <AboutPageView />
         ) : (
