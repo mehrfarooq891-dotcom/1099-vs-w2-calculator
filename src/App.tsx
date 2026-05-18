@@ -28,6 +28,7 @@ import jsPDF from 'jspdf';
 import AboutPageView from './AboutPage';
 import ContactPageView from './ContactPage';
 import BlogPageView from './BlogPage';
+import GuidePageView from './GuidePage';
 
 // --- Constants & Data (Updated for 2026 Estimates) ---
 
@@ -223,14 +224,17 @@ const Accordion = ({ title, children, icon: Icon }: any) => {
 // --- Main App ---
 
 export default function App() {
-  const [currentView, setCurrentView] = useState<'home' | 'about' | 'contact' | 'blog'>('home');
+  const [currentView, setCurrentView] = useState<'home' | 'about' | 'contact' | 'blog' | 'guide'>('home');
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   useEffect(() => {
     let title = "W2 vs 1099 Calculator | US Salary vs Contract Comparison";
     let description = "Calculate and compare your W2 salary vs 1099 contract income with our free US tax tool. Updated for 2026 tax year.";
 
-    if (currentView === 'blog') {
+    if (currentView === 'guide') {
+      title = "1099 vs W2 Taxes Explained: Guide for 2025";
+      description = "Understand the fundamental tax differences between W2 and 1099 including FICA, QBI, and estimated payments for 2025.";
+    } else if (currentView === 'blog') {
       title = "Self-Employment Tax Rate 2025: Guide for 1099 Workers";
       description = "What do 1099 contract workers actually pay in self-employment tax? Detailed breakdowns, the 92.35% rule, and 2025 examples.";
     } else if (currentView === 'about') {
@@ -418,12 +422,13 @@ export default function App() {
 
   const navLinks = [
     { label: 'Home', view: 'home' as const },
-    { label: 'Tax Guide 2025', view: 'blog' as const },
+    { label: 'SE Tax Guide', view: 'blog' as const },
+    { label: '1099 vs W2 Guide', view: 'guide' as const },
     { label: 'About', view: 'about' as const },
     { label: 'Contact', view: 'contact' as const },
   ];
 
-  const handleNavClick = (view: 'home' | 'about' | 'contact' | 'blog') => {
+  const handleNavClick = (view: 'home' | 'about' | 'contact' | 'blog' | 'guide') => {
     setCurrentView(view);
     setIsMenuOpen(false);
     window.scrollTo(0, 0);
@@ -903,6 +908,8 @@ export default function App() {
           </motion.div>
         ) : currentView === 'blog' ? (
           <BlogPageView handleNavClick={handleNavClick} />
+        ) : currentView === 'guide' ? (
+          <GuidePageView handleNavClick={handleNavClick} />
         ) : currentView === 'about' ? (
           <AboutPageView />
         ) : (

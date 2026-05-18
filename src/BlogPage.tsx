@@ -3,7 +3,7 @@ import { motion } from 'motion/react';
 import { Calculator, AlertCircle, ArrowRight, ShieldCheck, HelpCircle, FileText, Landmark, Key, Shield } from 'lucide-react';
 
 interface BlogPageProps {
-  handleNavClick: (view: 'home' | 'about' | 'contact' | 'blog') => void;
+  handleNavClick: (view: 'home' | 'about' | 'contact' | 'blog' | 'guide') => void;
 }
 
 const BlogPage: React.FC<BlogPageProps> = ({ handleNavClick }) => {
