@@ -29,6 +29,9 @@ import AboutPageView from './AboutPage';
 import ContactPageView from './ContactPage';
 import BlogPageView from './BlogPage';
 import GuidePageView from './GuidePage';
+import ContractorRatePageView from './ContractorRatePage';
+import QbiDeductionPageView from './QbiDeductionPage';
+import BenefitsComparisonPageView from './BenefitsComparisonPage';
 
 // --- Constants & Data (Updated for 2026 Estimates) ---
 
@@ -224,14 +227,23 @@ const Accordion = ({ title, children, icon: Icon }: any) => {
 // --- Main App ---
 
 export default function App() {
-  const [currentView, setCurrentView] = useState<'home' | 'about' | 'contact' | 'blog' | 'guide'>('home');
+  const [currentView, setCurrentView] = useState<'home' | 'about' | 'contact' | 'blog' | 'guide' | 'rate' | 'qbi' | 'benefits'>('home');
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   useEffect(() => {
     let title = "W2 vs 1099 Calculator | US Salary vs Contract Comparison";
     let description = "Calculate and compare your W2 salary vs 1099 contract income with our free US tax tool. Updated for 2026 tax year.";
 
-    if (currentView === 'guide') {
+    if (currentView === 'benefits') {
+      title = "1099 vs W2 Benefits: Dollar-for-Dollar Comparison Guide";
+      description = "Your salary number is not your compensation. Learn the 8 core benefits W2 employees receive that 1099 independent contractors must self-fund.";
+    } else if (currentView === 'qbi') {
+      title = "The QBI Deduction for 1099 Contractors: Guide for 2025";
+      description = "Learn how the Qualified Business Income (QBI) deduction works for 1099 independent contractors, including eligibility thresholds and phase-outs.";
+    } else if (currentView === 'rate') {
+      title = "How Much More Should You Charge as a 1099 Contractor? Pricing Guide";
+      description = "Find the exact floor percentage premium and minimum hourly rates you must negotiate when switching from a W2 salary to a 1099 contractor arrangement.";
+    } else if (currentView === 'guide') {
       title = "1099 vs W2 Taxes Explained: Guide for 2025";
       description = "Understand the fundamental tax differences between W2 and 1099 including FICA, QBI, and estimated payments for 2025.";
     } else if (currentView === 'blog') {
@@ -424,11 +436,14 @@ export default function App() {
     { label: 'Home', view: 'home' as const },
     { label: 'SE Tax Guide', view: 'blog' as const },
     { label: '1099 vs W2 Guide', view: 'guide' as const },
+    { label: 'Rate Guide', view: 'rate' as const },
+    { label: 'QBI Guide', view: 'qbi' as const },
+    { label: 'Benefits Guide', view: 'benefits' as const },
     { label: 'About', view: 'about' as const },
     { label: 'Contact', view: 'contact' as const },
   ];
 
-  const handleNavClick = (view: 'home' | 'about' | 'contact' | 'blog' | 'guide') => {
+  const handleNavClick = (view: 'home' | 'about' | 'contact' | 'blog' | 'guide' | 'rate' | 'qbi' | 'benefits') => {
     setCurrentView(view);
     setIsMenuOpen(false);
     window.scrollTo(0, 0);
@@ -910,6 +925,12 @@ export default function App() {
           <BlogPageView handleNavClick={handleNavClick} />
         ) : currentView === 'guide' ? (
           <GuidePageView handleNavClick={handleNavClick} />
+        ) : currentView === 'rate' ? (
+          <ContractorRatePageView handleNavClick={handleNavClick} />
+        ) : currentView === 'qbi' ? (
+          <QbiDeductionPageView handleNavClick={handleNavClick} />
+        ) : currentView === 'benefits' ? (
+          <BenefitsComparisonPageView handleNavClick={handleNavClick} />
         ) : currentView === 'about' ? (
           <AboutPageView />
         ) : (
