@@ -32,6 +32,7 @@ import GuidePageView from './GuidePage';
 import ContractorRatePageView from './ContractorRatePage';
 import QbiDeductionPageView from './QbiDeductionPage';
 import BenefitsComparisonPageView from './BenefitsComparisonPage';
+import CaliforniaComparisonPageView from './CaliforniaComparisonPage';
 
 // --- Constants & Data (Updated for 2026 Estimates) ---
 
@@ -227,14 +228,17 @@ const Accordion = ({ title, children, icon: Icon }: any) => {
 // --- Main App ---
 
 export default function App() {
-  const [currentView, setCurrentView] = useState<'home' | 'about' | 'contact' | 'blog' | 'guide' | 'rate' | 'qbi' | 'benefits'>('home');
+  const [currentView, setCurrentView] = useState<'home' | 'about' | 'contact' | 'blog' | 'guide' | 'rate' | 'qbi' | 'benefits' | 'california'>('home');
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   useEffect(() => {
     let title = "W2 vs 1099 Calculator | US Salary vs Contract Comparison";
     let description = "Calculate and compare your W2 salary vs 1099 contract income with our free US tax tool. Updated for 2026 tax year.";
 
-    if (currentView === 'benefits') {
+    if (currentView === 'california') {
+      title = "1099 vs W2 in California 2025: Why the Math Is Completely Different Here";
+      description = "California has the highest income tax in the US at 13.3%. Learn the CA state disability insurance (SDI) rules, QBI non-conformity adjustments, and tax calculations.";
+    } else if (currentView === 'benefits') {
       title = "1099 vs W2 Benefits: Dollar-for-Dollar Comparison Guide";
       description = "Your salary number is not your compensation. Learn the 8 core benefits W2 employees receive that 1099 independent contractors must self-fund.";
     } else if (currentView === 'qbi') {
@@ -439,11 +443,12 @@ export default function App() {
     { label: 'Rate Guide', view: 'rate' as const },
     { label: 'QBI Guide', view: 'qbi' as const },
     { label: 'Benefits Guide', view: 'benefits' as const },
+    { label: 'CA Guide', view: 'california' as const },
     { label: 'About', view: 'about' as const },
     { label: 'Contact', view: 'contact' as const },
   ];
 
-  const handleNavClick = (view: 'home' | 'about' | 'contact' | 'blog' | 'guide' | 'rate' | 'qbi' | 'benefits') => {
+  const handleNavClick = (view: 'home' | 'about' | 'contact' | 'blog' | 'guide' | 'rate' | 'qbi' | 'benefits' | 'california') => {
     setCurrentView(view);
     setIsMenuOpen(false);
     window.scrollTo(0, 0);
@@ -931,6 +936,8 @@ export default function App() {
           <QbiDeductionPageView handleNavClick={handleNavClick} />
         ) : currentView === 'benefits' ? (
           <BenefitsComparisonPageView handleNavClick={handleNavClick} />
+        ) : currentView === 'california' ? (
+          <CaliforniaComparisonPageView handleNavClick={handleNavClick} />
         ) : currentView === 'about' ? (
           <AboutPageView />
         ) : (
