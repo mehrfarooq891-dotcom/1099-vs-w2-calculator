@@ -33,6 +33,7 @@ import ContractorRatePageView from './ContractorRatePage';
 import QbiDeductionPageView from './QbiDeductionPage';
 import BenefitsComparisonPageView from './BenefitsComparisonPage';
 import CaliforniaComparisonPageView from './CaliforniaComparisonPage';
+import TexasComparisonPageView from './TexasComparisonPage';
 
 // --- Constants & Data (Updated for 2026 Estimates) ---
 
@@ -228,14 +229,17 @@ const Accordion = ({ title, children, icon: Icon }: any) => {
 // --- Main App ---
 
 export default function App() {
-  const [currentView, setCurrentView] = useState<'home' | 'about' | 'contact' | 'blog' | 'guide' | 'rate' | 'qbi' | 'benefits' | 'california'>('home');
+  const [currentView, setCurrentView] = useState<'home' | 'about' | 'contact' | 'blog' | 'guide' | 'rate' | 'qbi' | 'benefits' | 'california' | 'texas'>('home');
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   useEffect(() => {
     let title = "W2 vs 1099 Calculator | US Salary vs Contract Comparison";
     let description = "Calculate and compare your W2 salary vs 1099 contract income with our free US tax tool. Updated for 2026 tax year.";
 
-    if (currentView === 'california') {
+    if (currentView === 'texas') {
+      title = "1099 vs W2 in Texas: No State Income Tax — Does 1099 Win By Default?";
+      description = "Texas has zero state income tax. But does that automatically make 1099 work better here? Learn why independent contractors still face self-employment tax and private benefits math.";
+    } else if (currentView === 'california') {
       title = "1099 vs W2 in California 2025: Why the Math Is Completely Different Here";
       description = "California has the highest income tax in the US at 13.3%. Learn the CA state disability insurance (SDI) rules, QBI non-conformity adjustments, and tax calculations.";
     } else if (currentView === 'benefits') {
@@ -444,11 +448,12 @@ export default function App() {
     { label: 'QBI Guide', view: 'qbi' as const },
     { label: 'Benefits Guide', view: 'benefits' as const },
     { label: 'CA Guide', view: 'california' as const },
+    { label: 'TX Guide', view: 'texas' as const },
     { label: 'About', view: 'about' as const },
     { label: 'Contact', view: 'contact' as const },
   ];
 
-  const handleNavClick = (view: 'home' | 'about' | 'contact' | 'blog' | 'guide' | 'rate' | 'qbi' | 'benefits' | 'california') => {
+  const handleNavClick = (view: 'home' | 'about' | 'contact' | 'blog' | 'guide' | 'rate' | 'qbi' | 'benefits' | 'california' | 'texas') => {
     setCurrentView(view);
     setIsMenuOpen(false);
     window.scrollTo(0, 0);
@@ -938,6 +943,8 @@ export default function App() {
           <BenefitsComparisonPageView handleNavClick={handleNavClick} />
         ) : currentView === 'california' ? (
           <CaliforniaComparisonPageView handleNavClick={handleNavClick} />
+        ) : currentView === 'texas' ? (
+          <TexasComparisonPageView handleNavClick={handleNavClick} />
         ) : currentView === 'about' ? (
           <AboutPageView />
         ) : (
