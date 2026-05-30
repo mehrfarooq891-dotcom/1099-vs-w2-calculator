@@ -34,6 +34,7 @@ import QbiDeductionPageView from './QbiDeductionPage';
 import BenefitsComparisonPageView from './BenefitsComparisonPage';
 import CaliforniaComparisonPageView from './CaliforniaComparisonPage';
 import TexasComparisonPageView from './TexasComparisonPage';
+import NewYorkComparisonPageView from './NewYorkComparisonPage';
 
 // --- Constants & Data (Updated for 2026 Estimates) ---
 
@@ -229,14 +230,17 @@ const Accordion = ({ title, children, icon: Icon }: any) => {
 // --- Main App ---
 
 export default function App() {
-  const [currentView, setCurrentView] = useState<'home' | 'about' | 'contact' | 'blog' | 'guide' | 'rate' | 'qbi' | 'benefits' | 'california' | 'texas'>('home');
+  const [currentView, setCurrentView] = useState<'home' | 'about' | 'contact' | 'blog' | 'guide' | 'rate' | 'qbi' | 'benefits' | 'california' | 'texas' | 'newyork'>('home');
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   useEffect(() => {
     let title = "W2 vs 1099 Calculator | US Salary vs Contract Comparison";
     let description = "Calculate and compare your W2 salary vs 1099 contract income with our free US tax tool. Updated for 2026 tax year.";
 
-    if (currentView === 'texas') {
+    if (currentView === 'newyork') {
+      title = "1099 vs W2 in New York 2025: State Taxes, NYC Surcharge, and the Real Take-Home Math";
+      description = "Learn how New York State tax tiers, NYC's local surcharge of up to 3.876%, and NY's unique health insurance programs change the 1099 vs W2 independent contractor equation.";
+    } else if (currentView === 'texas') {
       title = "1099 vs W2 in Texas: No State Income Tax — Does 1099 Win By Default?";
       description = "Texas has zero state income tax. But does that automatically make 1099 work better here? Learn why independent contractors still face self-employment tax and private benefits math.";
     } else if (currentView === 'california') {
@@ -449,11 +453,12 @@ export default function App() {
     { label: 'Benefits Guide', view: 'benefits' as const },
     { label: 'CA Guide', view: 'california' as const },
     { label: 'TX Guide', view: 'texas' as const },
+    { label: 'NY Guide', view: 'newyork' as const },
     { label: 'About', view: 'about' as const },
     { label: 'Contact', view: 'contact' as const },
   ];
 
-  const handleNavClick = (view: 'home' | 'about' | 'contact' | 'blog' | 'guide' | 'rate' | 'qbi' | 'benefits' | 'california' | 'texas') => {
+  const handleNavClick = (view: 'home' | 'about' | 'contact' | 'blog' | 'guide' | 'rate' | 'qbi' | 'benefits' | 'california' | 'texas' | 'newyork') => {
     setCurrentView(view);
     setIsMenuOpen(false);
     window.scrollTo(0, 0);
@@ -945,6 +950,8 @@ export default function App() {
           <CaliforniaComparisonPageView handleNavClick={handleNavClick} />
         ) : currentView === 'texas' ? (
           <TexasComparisonPageView handleNavClick={handleNavClick} />
+        ) : currentView === 'newyork' ? (
+          <NewYorkComparisonPageView handleNavClick={handleNavClick} />
         ) : currentView === 'about' ? (
           <AboutPageView />
         ) : (
