@@ -3,7 +3,7 @@ import { motion } from 'motion/react';
 import { Calculator, AlertCircle, ArrowRight, ShieldCheck, HelpCircle, Compass, DollarSign, Table, Landmark } from 'lucide-react';
 
 interface NewYorkComparisonPageProps {
-  handleNavClick: (view: 'home' | 'about' | 'contact' | 'blog' | 'guide' | 'rate' | 'qbi' | 'benefits' | 'california' | 'texas' | 'newyork') => void;
+  handleNavClick: (view: 'home' | 'about' | 'contact' | 'blog' | 'guide' | 'rate' | 'qbi' | 'benefits' | 'california' | 'texas' | 'newyork' | 'florida' | 'washington') => void;
 }
 
 const NewYorkComparisonPage: React.FC<NewYorkComparisonPageProps> = ({ handleNavClick }) => {

@@ -3,7 +3,7 @@ import { motion } from 'motion/react';
 import { Calculator, AlertCircle, ArrowRight, BookOpen, Info, HelpCircle, FileText, CheckCircle2, Award, Percent, TrendingUp } from 'lucide-react';
 
 interface QbiDeductionPageProps {
-  handleNavClick: (view: 'home' | 'about' | 'contact' | 'blog' | 'guide' | 'rate' | 'qbi' | 'benefits' | 'california' | 'texas' | 'newyork' | 'florida') => void;
+  handleNavClick: (view: 'home' | 'about' | 'contact' | 'blog' | 'guide' | 'rate' | 'qbi' | 'benefits' | 'california' | 'texas' | 'newyork' | 'florida' | 'washington') => void;
 }
 
 const QbiDeductionPage: React.FC<QbiDeductionPageProps> = ({ handleNavClick }) => {

@@ -36,6 +36,7 @@ import CaliforniaComparisonPageView from './CaliforniaComparisonPage';
 import TexasComparisonPageView from './TexasComparisonPage';
 import NewYorkComparisonPageView from './NewYorkComparisonPage';
 import FloridaComparisonPageView from './FloridaComparisonPage';
+import WashingtonComparisonPageView from './WashingtonComparisonPage';
 
 // --- Constants & Data (Updated for 2026 Estimates) ---
 
@@ -231,14 +232,17 @@ const Accordion = ({ title, children, icon: Icon }: any) => {
 // --- Main App ---
 
 export default function App() {
-  const [currentView, setCurrentView] = useState<'home' | 'about' | 'contact' | 'blog' | 'guide' | 'rate' | 'qbi' | 'benefits' | 'california' | 'texas' | 'newyork' | 'florida'>('home');
+  const [currentView, setCurrentView] = useState<'home' | 'about' | 'contact' | 'blog' | 'guide' | 'rate' | 'qbi' | 'benefits' | 'california' | 'texas' | 'newyork' | 'florida' | 'washington'>('home');
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   useEffect(() => {
     let title = "W2 vs 1099 Calculator | US Salary vs Contract Comparison";
     let description = "Calculate and compare your W2 salary vs 1099 contract income with our free US tax tool. Updated for 2026 tax year.";
 
-    if (currentView === 'florida') {
+    if (currentView === 'washington') {
+      title = "1099 vs W2 in Washington State 2025: No Income Tax — But Watch Out for This";
+      description = "Learn how Washington State's lack of personal income tax interacts with the WA Cares long-term care surcharge, local B&O tax, and private benefits math.";
+    } else if (currentView === 'florida') {
       title = "1099 vs W2 in Florida 2025: No State Tax, But Here's What Changes";
       description = "Learn how Florida's zero state income tax, self-employment taxes, and individual benefits landscape alter the 1099 vs W2 independent contractor comparison.";
     } else if (currentView === 'newyork') {
@@ -459,11 +463,12 @@ export default function App() {
     { label: 'TX Guide', view: 'texas' as const },
     { label: 'NY Guide', view: 'newyork' as const },
     { label: 'FL Guide', view: 'florida' as const },
+    { label: 'WA Guide', view: 'washington' as const },
     { label: 'About', view: 'about' as const },
     { label: 'Contact', view: 'contact' as const },
   ];
 
-  const handleNavClick = (view: 'home' | 'about' | 'contact' | 'blog' | 'guide' | 'rate' | 'qbi' | 'benefits' | 'california' | 'texas' | 'newyork' | 'florida') => {
+  const handleNavClick = (view: 'home' | 'about' | 'contact' | 'blog' | 'guide' | 'rate' | 'qbi' | 'benefits' | 'california' | 'texas' | 'newyork' | 'florida' | 'washington') => {
     setCurrentView(view);
     setIsMenuOpen(false);
     window.scrollTo(0, 0);
@@ -959,6 +964,8 @@ export default function App() {
           <NewYorkComparisonPageView handleNavClick={handleNavClick} />
         ) : currentView === 'florida' ? (
           <FloridaComparisonPageView handleNavClick={handleNavClick} />
+        ) : currentView === 'washington' ? (
+          <WashingtonComparisonPageView handleNavClick={handleNavClick} />
         ) : currentView === 'about' ? (
           <AboutPageView />
         ) : (
