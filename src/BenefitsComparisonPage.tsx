@@ -3,7 +3,7 @@ import { motion } from 'motion/react';
 import { Calculator, AlertCircle, ArrowRight, ShieldCheck, Heart, PiggyBank, Clock, LifeBuoy, FileText, HelpCircle, Briefcase, Award } from 'lucide-react';
 
 interface BenefitsComparisonPageProps {
-  handleNavClick: (view: 'home' | 'about' | 'contact' | 'blog' | 'guide' | 'rate' | 'qbi' | 'benefits' | 'california' | 'texas' | 'newyork' | 'florida' | 'washington') => void;
+  handleNavClick: (view: 'home' | 'about' | 'contact' | 'blog' | 'guide' | 'rate' | 'qbi' | 'benefits' | 'california' | 'texas' | 'newyork' | 'florida' | 'washington' | 'illinois') => void;
 }
 
 const BenefitsComparisonPage: React.FC<BenefitsComparisonPageProps> = ({ handleNavClick }) => {
