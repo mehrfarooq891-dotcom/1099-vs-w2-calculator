@@ -39,6 +39,7 @@ import FloridaComparisonPageView from './FloridaComparisonPage';
 import WashingtonComparisonPageView from './WashingtonComparisonPage';
 import IllinoisComparisonPageView from './IllinoisComparisonPage';
 import GeorgiaComparisonPageView from './GeorgiaComparisonPage';
+import ColoradoComparisonPageView from './ColoradoComparisonPage';
 
 // --- Constants & Data (Updated for 2026 Estimates) ---
 
@@ -234,14 +235,17 @@ const Accordion = ({ title, children, icon: Icon }: any) => {
 // --- Main App ---
 
 export default function App() {
-  const [currentView, setCurrentView] = useState<'home' | 'about' | 'contact' | 'blog' | 'guide' | 'rate' | 'qbi' | 'benefits' | 'california' | 'texas' | 'newyork' | 'florida' | 'washington' | 'illinois' | 'georgia'>('home');
+  const [currentView, setCurrentView] = useState<'home' | 'about' | 'contact' | 'blog' | 'guide' | 'rate' | 'qbi' | 'benefits' | 'california' | 'texas' | 'newyork' | 'florida' | 'washington' | 'illinois' | 'georgia' | 'colorado'>('home');
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   useEffect(() => {
     let title = "W2 vs 1099 Calculator | US Salary vs Contract Comparison";
     let description = "Calculate and compare your W2 salary vs 1099 contract income with our free US tax tool. Updated for 2026 tax year.";
 
-    if (currentView === 'georgia') {
+    if (currentView === 'colorado') {
+      title = "1099 vs W2 in Colorado 2025: Denver's Contractor Market and the 4.4% Flat Tax";
+      description = "Learn how Colorado's flat 4.4% state income tax, optional FAMLI payroll program, and private lifestyle perks shape the 1099 vs W2 strategy.";
+    } else if (currentView === 'georgia') {
       title = "1099 vs W2 in Georgia 2025: New Flat Tax Rate and What It Means for Contractors";
       description = "Learn how Georgia's new flat 5.49% state income tax rate, zero municipal income tax, and Georgia Access health exchange impact 1099 vs W2 choice.";
     } else if (currentView === 'illinois') {
@@ -474,11 +478,12 @@ export default function App() {
     { label: 'WA Guide', view: 'washington' as const },
     { label: 'IL Guide', view: 'illinois' as const },
     { label: 'GA Guide', view: 'georgia' as const },
+    { label: 'CO Guide', view: 'colorado' as const },
     { label: 'About', view: 'about' as const },
     { label: 'Contact', view: 'contact' as const },
   ];
 
-  const handleNavClick = (view: 'home' | 'about' | 'contact' | 'blog' | 'guide' | 'rate' | 'qbi' | 'benefits' | 'california' | 'texas' | 'newyork' | 'florida' | 'washington' | 'illinois' | 'georgia') => {
+  const handleNavClick = (view: 'home' | 'about' | 'contact' | 'blog' | 'guide' | 'rate' | 'qbi' | 'benefits' | 'california' | 'texas' | 'newyork' | 'florida' | 'washington' | 'illinois' | 'georgia' | 'colorado') => {
     setCurrentView(view);
     setIsMenuOpen(false);
     window.scrollTo(0, 0);
@@ -980,6 +985,8 @@ export default function App() {
           <IllinoisComparisonPageView handleNavClick={handleNavClick} />
         ) : currentView === 'georgia' ? (
           <GeorgiaComparisonPageView handleNavClick={handleNavClick} />
+        ) : currentView === 'colorado' ? (
+          <ColoradoComparisonPageView handleNavClick={handleNavClick} />
         ) : currentView === 'about' ? (
           <AboutPageView />
         ) : (
