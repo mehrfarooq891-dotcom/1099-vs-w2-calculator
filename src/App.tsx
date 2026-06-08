@@ -42,6 +42,7 @@ import GeorgiaComparisonPageView from './GeorgiaComparisonPage';
 import ColoradoComparisonPageView from './ColoradoComparisonPage';
 import SoftwareEngineerComparisonPageView from './SoftwareEngineerComparisonPage';
 import NurseComparisonPageView from './NurseComparisonPage';
+import RealEstateComparisonPageView from './RealEstateComparisonPage';
 
 // --- Constants & Data (Updated for 2026 Estimates) ---
 
@@ -237,14 +238,17 @@ const Accordion = ({ title, children, icon: Icon }: any) => {
 // --- Main App ---
 
 export default function App() {
-  const [currentView, setCurrentView] = useState<'home' | 'about' | 'contact' | 'blog' | 'guide' | 'rate' | 'qbi' | 'benefits' | 'california' | 'texas' | 'newyork' | 'florida' | 'washington' | 'illinois' | 'georgia' | 'colorado' | 'software' | 'nurse'>('home');
+  const [currentView, setCurrentView] = useState<'home' | 'about' | 'contact' | 'blog' | 'guide' | 'rate' | 'qbi' | 'benefits' | 'california' | 'texas' | 'newyork' | 'florida' | 'washington' | 'illinois' | 'georgia' | 'colorado' | 'software' | 'nurse' | 'realestate'>('home');
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   useEffect(() => {
     let title = "W2 vs 1099 Calculator | US Salary vs Contract Comparison";
     let description = "Calculate and compare your W2 salary vs 1099 contract income with our free US tax tool. Updated for 2026 tax year.";
 
-    if (currentView === 'nurse') {
+    if (currentView === 'realestate') {
+      title = "1099 vs W2 for Real Estate Agents: Why Almost All Agents Are 1099 (And the Tax Implications)";
+      description = "Compare W2 real estate payroll models with standard 1099 commission splits. Read real estate agents deductions like MLS fees, vehicle calculations, and S-Corp tax structures.";
+    } else if (currentView === 'nurse') {
       title = "1099 vs W2 for Nurses and Travel Nurses in 2025: The Complete Tax Guide";
       description = "Compare $110k W2 clinical roles against premium $85/hr independent healthcare contracts. Evaluate travel nursing tax-free stipends, malpractice premiums, and QBI deductions.";
     } else if (currentView === 'software') {
@@ -481,6 +485,7 @@ export default function App() {
     { label: 'Benefits Guide', view: 'benefits' as const },
     { label: 'Tech Guide', view: 'software' as const },
     { label: 'Nurse Guide', view: 'nurse' as const },
+    { label: 'RE Guide', view: 'realestate' as const },
     { label: 'CA Guide', view: 'california' as const },
     { label: 'TX Guide', view: 'texas' as const },
     { label: 'NY Guide', view: 'newyork' as const },
@@ -493,7 +498,7 @@ export default function App() {
     { label: 'Contact', view: 'contact' as const },
   ];
 
-  const handleNavClick = (view: 'home' | 'about' | 'contact' | 'blog' | 'guide' | 'rate' | 'qbi' | 'benefits' | 'california' | 'texas' | 'newyork' | 'florida' | 'washington' | 'illinois' | 'georgia' | 'colorado' | 'software' | 'nurse') => {
+  const handleNavClick = (view: 'home' | 'about' | 'contact' | 'blog' | 'guide' | 'rate' | 'qbi' | 'benefits' | 'california' | 'texas' | 'newyork' | 'florida' | 'washington' | 'illinois' | 'georgia' | 'colorado' | 'software' | 'nurse' | 'realestate') => {
     setCurrentView(view);
     setIsMenuOpen(false);
     window.scrollTo(0, 0);
@@ -1001,6 +1006,8 @@ export default function App() {
           <SoftwareEngineerComparisonPageView handleNavClick={handleNavClick} />
         ) : currentView === 'nurse' ? (
           <NurseComparisonPageView handleNavClick={handleNavClick} />
+        ) : currentView === 'realestate' ? (
+          <RealEstateComparisonPageView handleNavClick={handleNavClick} />
         ) : currentView === 'about' ? (
           <AboutPageView />
         ) : (
