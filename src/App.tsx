@@ -43,6 +43,7 @@ import ColoradoComparisonPageView from './ColoradoComparisonPage';
 import SoftwareEngineerComparisonPageView from './SoftwareEngineerComparisonPage';
 import NurseComparisonPageView from './NurseComparisonPage';
 import RealEstateComparisonPageView from './RealEstateComparisonPage';
+import TruckDriverComparisonPageView from './TruckDriverComparisonPage';
 
 // --- Constants & Data (Updated for 2026 Estimates) ---
 
@@ -238,14 +239,17 @@ const Accordion = ({ title, children, icon: Icon }: any) => {
 // --- Main App ---
 
 export default function App() {
-  const [currentView, setCurrentView] = useState<'home' | 'about' | 'contact' | 'blog' | 'guide' | 'rate' | 'qbi' | 'benefits' | 'california' | 'texas' | 'newyork' | 'florida' | 'washington' | 'illinois' | 'georgia' | 'colorado' | 'software' | 'nurse' | 'realestate'>('home');
+  const [currentView, setCurrentView] = useState<'home' | 'about' | 'contact' | 'blog' | 'guide' | 'rate' | 'qbi' | 'benefits' | 'california' | 'texas' | 'newyork' | 'florida' | 'washington' | 'illinois' | 'georgia' | 'colorado' | 'software' | 'nurse' | 'realestate' | 'truck'>('home');
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   useEffect(() => {
     let title = "W2 vs 1099 Calculator | US Salary vs Contract Comparison";
     let description = "Calculate and compare your W2 salary vs 1099 contract income with our free US tax tool. Updated for 2026 tax year.";
 
-    if (currentView === 'realestate') {
+    if (currentView === 'truck') {
+      title = "Owner-Operator vs Company Driver: The Full 1099 vs W2 Tax Breakdown for Truck Drivers";
+      description = "Compare W2 company driver stability against 1099 owner-operator margins. Review truck depreciation, fuel expenses, maintenance reserves, IFTA taxes, and special per-diem rules.";
+    } else if (currentView === 'realestate') {
       title = "1099 vs W2 for Real Estate Agents: Why Almost All Agents Are 1099 (And the Tax Implications)";
       description = "Compare W2 real estate payroll models with standard 1099 commission splits. Read real estate agents deductions like MLS fees, vehicle calculations, and S-Corp tax structures.";
     } else if (currentView === 'nurse') {
@@ -486,6 +490,7 @@ export default function App() {
     { label: 'Tech Guide', view: 'software' as const },
     { label: 'Nurse Guide', view: 'nurse' as const },
     { label: 'RE Guide', view: 'realestate' as const },
+    { label: 'Trucker Guide', view: 'truck' as const },
     { label: 'CA Guide', view: 'california' as const },
     { label: 'TX Guide', view: 'texas' as const },
     { label: 'NY Guide', view: 'newyork' as const },
@@ -498,7 +503,7 @@ export default function App() {
     { label: 'Contact', view: 'contact' as const },
   ];
 
-  const handleNavClick = (view: 'home' | 'about' | 'contact' | 'blog' | 'guide' | 'rate' | 'qbi' | 'benefits' | 'california' | 'texas' | 'newyork' | 'florida' | 'washington' | 'illinois' | 'georgia' | 'colorado' | 'software' | 'nurse' | 'realestate') => {
+  const handleNavClick = (view: 'home' | 'about' | 'contact' | 'blog' | 'guide' | 'rate' | 'qbi' | 'benefits' | 'california' | 'texas' | 'newyork' | 'florida' | 'washington' | 'illinois' | 'georgia' | 'colorado' | 'software' | 'nurse' | 'realestate' | 'truck') => {
     setCurrentView(view);
     setIsMenuOpen(false);
     window.scrollTo(0, 0);
@@ -1008,6 +1013,8 @@ export default function App() {
           <NurseComparisonPageView handleNavClick={handleNavClick} />
         ) : currentView === 'realestate' ? (
           <RealEstateComparisonPageView handleNavClick={handleNavClick} />
+        ) : currentView === 'truck' ? (
+          <TruckDriverComparisonPageView handleNavClick={handleNavClick} />
         ) : currentView === 'about' ? (
           <AboutPageView />
         ) : (
