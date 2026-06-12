@@ -2,5 +2,5 @@
   "name": "W2 vs 1099 Calculator",
   "description": "Professional-grade financial comparison tool for US tax accuracy, including QBI, SE tax, and state-specific calculations.",
   "requestFramePermissions": [],
-  "majorCapabilities": []
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

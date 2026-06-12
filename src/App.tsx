@@ -45,6 +45,7 @@ import NurseComparisonPageView from './NurseComparisonPage';
 import RealEstateComparisonPageView from './RealEstateComparisonPage';
 import TruckDriverComparisonPageView from './TruckDriverComparisonPage';
 import TherapistComparisonPageView from './TherapistComparisonPage';
+import ConsultantComparisonPageView from './ConsultantComparisonPage';
 
 // --- Constants & Data (Updated for 2026 Estimates) ---
 
@@ -240,14 +241,17 @@ const Accordion = ({ title, children, icon: Icon }: any) => {
 // --- Main App ---
 
 export default function App() {
-  const [currentView, setCurrentView] = useState<'home' | 'about' | 'contact' | 'blog' | 'guide' | 'rate' | 'qbi' | 'benefits' | 'california' | 'texas' | 'newyork' | 'florida' | 'washington' | 'illinois' | 'georgia' | 'colorado' | 'software' | 'nurse' | 'realestate' | 'truck' | 'therapist'>('home');
+  const [currentView, setCurrentView] = useState<'home' | 'about' | 'contact' | 'blog' | 'guide' | 'rate' | 'qbi' | 'benefits' | 'california' | 'texas' | 'newyork' | 'florida' | 'washington' | 'illinois' | 'georgia' | 'colorado' | 'software' | 'nurse' | 'realestate' | 'truck' | 'therapist' | 'consultant'>('home');
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   useEffect(() => {
     let title = "W2 vs 1099 Calculator | US Salary vs Contract Comparison";
     let description = "Calculate and compare your W2 salary vs 1099 contract income with our free US tax tool. Updated for 2026 tax year.";
 
-    if (currentView === 'therapist') {
+    if (currentView === 'consultant') {
+      title = "Consultant 1099 vs W2: When to Incorporate, When to Stay Solo, and How to Not Overpay Taxes";
+      description = "Compare $130k W2 Deloitte salaries with $180k independent consulting contracts. Learn when to form an S-Corp, manage reasonable salaries to save self-employment tax, and claim deductions.";
+    } else if (currentView === 'therapist') {
       title = "1099 vs W2 for Therapists and Counselors in 2025: Private Practice vs Agency Employment";
       description = "Compare W2 clinical roles against independent 1099 contracts. Evaluate home office deductions, electronic health records (EHR) overhead, malpractice policies, and burnout rates.";
     } else if (currentView === 'truck') {
@@ -496,6 +500,7 @@ export default function App() {
     { label: 'RE Guide', view: 'realestate' as const },
     { label: 'Trucker Guide', view: 'truck' as const },
     { label: 'Therapist Guide', view: 'therapist' as const },
+    { label: 'Consultant Guide', view: 'consultant' as const },
     { label: 'CA Guide', view: 'california' as const },
     { label: 'TX Guide', view: 'texas' as const },
     { label: 'NY Guide', view: 'newyork' as const },
@@ -508,7 +513,7 @@ export default function App() {
     { label: 'Contact', view: 'contact' as const },
   ];
 
-  const handleNavClick = (view: 'home' | 'about' | 'contact' | 'blog' | 'guide' | 'rate' | 'qbi' | 'benefits' | 'california' | 'texas' | 'newyork' | 'florida' | 'washington' | 'illinois' | 'georgia' | 'colorado' | 'software' | 'nurse' | 'realestate' | 'truck' | 'therapist') => {
+  const handleNavClick = (view: 'home' | 'about' | 'contact' | 'blog' | 'guide' | 'rate' | 'qbi' | 'benefits' | 'california' | 'texas' | 'newyork' | 'florida' | 'washington' | 'illinois' | 'georgia' | 'colorado' | 'software' | 'nurse' | 'realestate' | 'truck' | 'therapist' | 'consultant') => {
     setCurrentView(view);
     setIsMenuOpen(false);
     window.scrollTo(0, 0);
@@ -1022,6 +1027,8 @@ export default function App() {
           <TruckDriverComparisonPageView handleNavClick={handleNavClick} />
         ) : currentView === 'therapist' ? (
           <TherapistComparisonPageView handleNavClick={handleNavClick} />
+        ) : currentView === 'consultant' ? (
+          <ConsultantComparisonPageView handleNavClick={handleNavClick} />
         ) : currentView === 'about' ? (
           <AboutPageView />
         ) : (
