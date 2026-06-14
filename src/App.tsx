@@ -46,6 +46,7 @@ import RealEstateComparisonPageView from './RealEstateComparisonPage';
 import TruckDriverComparisonPageView from './TruckDriverComparisonPage';
 import TherapistComparisonPageView from './TherapistComparisonPage';
 import ConsultantComparisonPageView from './ConsultantComparisonPage';
+import MixedIncomePageView from './MixedIncomePage';
 
 // --- Constants & Data (Updated for 2026 Estimates) ---
 
@@ -241,14 +242,17 @@ const Accordion = ({ title, children, icon: Icon }: any) => {
 // --- Main App ---
 
 export default function App() {
-  const [currentView, setCurrentView] = useState<'home' | 'about' | 'contact' | 'blog' | 'guide' | 'rate' | 'qbi' | 'benefits' | 'california' | 'texas' | 'newyork' | 'florida' | 'washington' | 'illinois' | 'georgia' | 'colorado' | 'software' | 'nurse' | 'realestate' | 'truck' | 'therapist' | 'consultant'>('home');
+  const [currentView, setCurrentView] = useState<'home' | 'about' | 'contact' | 'blog' | 'guide' | 'rate' | 'qbi' | 'benefits' | 'california' | 'texas' | 'newyork' | 'florida' | 'washington' | 'illinois' | 'georgia' | 'colorado' | 'software' | 'nurse' | 'realestate' | 'truck' | 'therapist' | 'consultant' | 'mixed'>('home');
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   useEffect(() => {
     let title = "W2 vs 1099 Calculator | US Salary vs Contract Comparison";
     let description = "Calculate and compare your W2 salary vs 1099 contract income with our free US tax tool. Updated for 2026 tax year.";
 
-    if (currentView === 'consultant') {
+    if (currentView === 'mixed') {
+      title = "Got Both W2 and a 1099 This Year? Here's Exactly How Your Taxes Work";
+      description = "W2 and 1099 in same year taxes guide. Learn how 1099 side income stacks on top of W2 salary brackets, self-employment tax filings, and Form W-4 withholding hacks to avoid penalty fees.";
+    } else if (currentView === 'consultant') {
       title = "Consultant 1099 vs W2: When to Incorporate, When to Stay Solo, and How to Not Overpay Taxes";
       description = "Compare $130k W2 Deloitte salaries with $180k independent consulting contracts. Learn when to form an S-Corp, manage reasonable salaries to save self-employment tax, and claim deductions.";
     } else if (currentView === 'therapist') {
@@ -501,6 +505,7 @@ export default function App() {
     { label: 'Trucker Guide', view: 'truck' as const },
     { label: 'Therapist Guide', view: 'therapist' as const },
     { label: 'Consultant Guide', view: 'consultant' as const },
+    { label: 'Mixed Income Guide', view: 'mixed' as const },
     { label: 'CA Guide', view: 'california' as const },
     { label: 'TX Guide', view: 'texas' as const },
     { label: 'NY Guide', view: 'newyork' as const },
@@ -513,7 +518,7 @@ export default function App() {
     { label: 'Contact', view: 'contact' as const },
   ];
 
-  const handleNavClick = (view: 'home' | 'about' | 'contact' | 'blog' | 'guide' | 'rate' | 'qbi' | 'benefits' | 'california' | 'texas' | 'newyork' | 'florida' | 'washington' | 'illinois' | 'georgia' | 'colorado' | 'software' | 'nurse' | 'realestate' | 'truck' | 'therapist' | 'consultant') => {
+  const handleNavClick = (view: 'home' | 'about' | 'contact' | 'blog' | 'guide' | 'rate' | 'qbi' | 'benefits' | 'california' | 'texas' | 'newyork' | 'florida' | 'washington' | 'illinois' | 'georgia' | 'colorado' | 'software' | 'nurse' | 'realestate' | 'truck' | 'therapist' | 'consultant' | 'mixed') => {
     setCurrentView(view);
     setIsMenuOpen(false);
     window.scrollTo(0, 0);
@@ -1029,6 +1034,8 @@ export default function App() {
           <TherapistComparisonPageView handleNavClick={handleNavClick} />
         ) : currentView === 'consultant' ? (
           <ConsultantComparisonPageView handleNavClick={handleNavClick} />
+        ) : currentView === 'mixed' ? (
+          <MixedIncomePageView handleNavClick={handleNavClick} />
         ) : currentView === 'about' ? (
           <AboutPageView />
         ) : (
