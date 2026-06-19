@@ -50,6 +50,7 @@ import MixedIncomePageView from './MixedIncomePage';
 import QuarterlyEstimatedTaxesPageView from './QuarterlyEstimatedTaxesPage';
 import HomeOfficeDeductionPageView from './HomeOfficeDeductionPage';
 import HealthInsuranceDeductionPageView from './HealthInsuranceDeductionPage';
+import RetirementComparisonPageView from './RetirementComparisonPage';
 
 // --- Constants & Data (Updated for 2026 Estimates) ---
 
@@ -245,14 +246,17 @@ const Accordion = ({ title, children, icon: Icon }: any) => {
 // --- Main App ---
 
 export default function App() {
-  const [currentView, setCurrentView] = useState<'home' | 'about' | 'contact' | 'blog' | 'guide' | 'rate' | 'qbi' | 'benefits' | 'california' | 'texas' | 'newyork' | 'florida' | 'washington' | 'illinois' | 'georgia' | 'colorado' | 'software' | 'nurse' | 'realestate' | 'truck' | 'therapist' | 'consultant' | 'mixed' | 'estimated' | 'homeoffice' | 'healthins'>('home');
+  const [currentView, setCurrentView] = useState<'home' | 'about' | 'contact' | 'blog' | 'guide' | 'rate' | 'qbi' | 'benefits' | 'california' | 'texas' | 'newyork' | 'florida' | 'washington' | 'illinois' | 'georgia' | 'colorado' | 'software' | 'nurse' | 'realestate' | 'truck' | 'therapist' | 'consultant' | 'mixed' | 'estimated' | 'homeoffice' | 'healthins' | 'retirement'>('home');
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   useEffect(() => {
     let title = "W2 vs 1099 Calculator | US Salary vs Contract Comparison";
     let description = "Calculate and compare your W2 salary vs 1099 contract income with our free US tax tool. Updated for 2026 tax year.";
 
-    if (currentView === 'healthins') {
+    if (currentView === 'retirement') {
+      title = "SEP-IRA vs Solo 401(k) for 1099 Contractors: Which Saves You More in Taxes? (2025)";
+      description = "Compare SEP IRA vs Solo 401k 1099 contractor savings. Study 2025 contribution limits, discover who wins at each income level, and see full pre-tax savings comparisons.";
+    } else if (currentView === 'healthins') {
       title = "Self-Employed Health Insurance Deduction: The 1099 Tax Break Worth Thousands (2025 Guide)";
       description = "1099 health insurance deduction self employed. Deduct 100% of medical, dental, and vision premiums above-the-line on Schedule 1 to lower AGI and progressive tax costs.";
     } else if (currentView === 'homeoffice') {
@@ -521,6 +525,7 @@ export default function App() {
     { label: 'Estimated Tax Guide', view: 'estimated' as const },
     { label: 'Home Office Guide', view: 'homeoffice' as const },
     { label: 'Health Insurance Guide', view: 'healthins' as const },
+    { label: 'Retirement Guide', view: 'retirement' as const },
     { label: 'CA Guide', view: 'california' as const },
     { label: 'TX Guide', view: 'texas' as const },
     { label: 'NY Guide', view: 'newyork' as const },
@@ -533,7 +538,7 @@ export default function App() {
     { label: 'Contact', view: 'contact' as const },
   ];
 
-  const handleNavClick = (view: 'home' | 'about' | 'contact' | 'blog' | 'guide' | 'rate' | 'qbi' | 'benefits' | 'california' | 'texas' | 'newyork' | 'florida' | 'washington' | 'illinois' | 'georgia' | 'colorado' | 'software' | 'nurse' | 'realestate' | 'truck' | 'therapist' | 'consultant' | 'mixed' | 'estimated' | 'homeoffice' | 'healthins') => {
+  const handleNavClick = (view: 'home' | 'about' | 'contact' | 'blog' | 'guide' | 'rate' | 'qbi' | 'benefits' | 'california' | 'texas' | 'newyork' | 'florida' | 'washington' | 'illinois' | 'georgia' | 'colorado' | 'software' | 'nurse' | 'realestate' | 'truck' | 'therapist' | 'consultant' | 'mixed' | 'estimated' | 'homeoffice' | 'healthins' | 'retirement') => {
     setCurrentView(view);
     setIsMenuOpen(false);
     window.scrollTo(0, 0);
@@ -1057,6 +1062,8 @@ export default function App() {
           <HomeOfficeDeductionPageView handleNavClick={handleNavClick} />
         ) : currentView === 'healthins' ? (
           <HealthInsuranceDeductionPageView handleNavClick={handleNavClick} />
+        ) : currentView === 'retirement' ? (
+          <RetirementComparisonPageView handleNavClick={handleNavClick} />
         ) : currentView === 'about' ? (
           <AboutPageView />
         ) : (
