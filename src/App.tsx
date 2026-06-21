@@ -52,6 +52,7 @@ import HomeOfficeDeductionPageView from './HomeOfficeDeductionPage';
 import HealthInsuranceDeductionPageView from './HealthInsuranceDeductionPage';
 import RetirementComparisonPageView from './RetirementComparisonPage';
 import MisclassificationPageView from './MisclassificationPage';
+import W2or1099DecisionPageView from './W2or1099DecisionPage';
 
 // --- Constants & Data (Updated for 2026 Estimates) ---
 
@@ -247,14 +248,17 @@ const Accordion = ({ title, children, icon: Icon }: any) => {
 // --- Main App ---
 
 export default function App() {
-  const [currentView, setCurrentView] = useState<'home' | 'about' | 'contact' | 'blog' | 'guide' | 'rate' | 'qbi' | 'benefits' | 'california' | 'texas' | 'newyork' | 'florida' | 'washington' | 'illinois' | 'georgia' | 'colorado' | 'software' | 'nurse' | 'realestate' | 'truck' | 'therapist' | 'consultant' | 'mixed' | 'estimated' | 'homeoffice' | 'healthins' | 'retirement' | 'misclassified'>('home');
+  const [currentView, setCurrentView] = useState<'home' | 'about' | 'contact' | 'blog' | 'guide' | 'rate' | 'qbi' | 'benefits' | 'california' | 'texas' | 'newyork' | 'florida' | 'washington' | 'illinois' | 'georgia' | 'colorado' | 'software' | 'nurse' | 'realestate' | 'truck' | 'therapist' | 'consultant' | 'mixed' | 'estimated' | 'homeoffice' | 'healthins' | 'retirement' | 'misclassified' | 'w2or1099'>('home');
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   useEffect(() => {
     let title = "W2 vs 1099 Calculator | US Salary vs Contract Comparison";
     let description = "Calculate and compare your W2 salary vs 1099 contract income with our free US tax tool. Updated for 2026 tax year.";
 
-    if (currentView === 'misclassified') {
+    if (currentView === 'w2or1099') {
+      title = "Should You Go 1099 or Stay W2? The 7-Question Test That Gives You a Clear Answer (2025)";
+      description = "should I become a 1099 contractor or stay W2. Run our 7-question test to calculate your contract suitability, evaluate direct tax savings, and study real dollar benefits math.";
+    } else if (currentView === 'misclassified') {
       title = "Misclassified as a 1099 Contractor? Here's What You Can Do and What You're Owed";
       description = "Misclassified as independent contractor what to do. IRS 3-factor test, request SS-8 determinations, file Form 8919, check California AB5, and recover FICA shares.";
     } else if (currentView === 'retirement') {
@@ -531,6 +535,7 @@ export default function App() {
     { label: 'Health Insurance Guide', view: 'healthins' as const },
     { label: 'Retirement Guide', view: 'retirement' as const },
     { label: 'Misclassification Guide', view: 'misclassified' as const },
+    { label: 'W2 vs 1099 Choice', view: 'w2or1099' as const },
     { label: 'CA Guide', view: 'california' as const },
     { label: 'TX Guide', view: 'texas' as const },
     { label: 'NY Guide', view: 'newyork' as const },
@@ -543,7 +548,7 @@ export default function App() {
     { label: 'Contact', view: 'contact' as const },
   ];
 
-  const handleNavClick = (view: 'home' | 'about' | 'contact' | 'blog' | 'guide' | 'rate' | 'qbi' | 'benefits' | 'california' | 'texas' | 'newyork' | 'florida' | 'washington' | 'illinois' | 'georgia' | 'colorado' | 'software' | 'nurse' | 'realestate' | 'truck' | 'therapist' | 'consultant' | 'mixed' | 'estimated' | 'homeoffice' | 'healthins' | 'retirement' | 'misclassified') => {
+  const handleNavClick = (view: 'home' | 'about' | 'contact' | 'blog' | 'guide' | 'rate' | 'qbi' | 'benefits' | 'california' | 'texas' | 'newyork' | 'florida' | 'washington' | 'illinois' | 'georgia' | 'colorado' | 'software' | 'nurse' | 'realestate' | 'truck' | 'therapist' | 'consultant' | 'mixed' | 'estimated' | 'homeoffice' | 'healthins' | 'retirement' | 'misclassified' | 'w2or1099') => {
     setCurrentView(view);
     setIsMenuOpen(false);
     window.scrollTo(0, 0);
@@ -1071,6 +1076,8 @@ export default function App() {
           <RetirementComparisonPageView handleNavClick={handleNavClick} />
         ) : currentView === 'misclassified' ? (
           <MisclassificationPageView handleNavClick={handleNavClick} />
+        ) : currentView === 'w2or1099' ? (
+          <W2or1099DecisionPageView handleNavClick={handleNavClick} />
         ) : currentView === 'about' ? (
           <AboutPageView />
         ) : (
