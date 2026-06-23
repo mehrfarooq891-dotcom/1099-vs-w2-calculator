@@ -3,7 +3,7 @@ import { motion } from 'motion/react';
 import { Calculator, AlertCircle, ArrowRight, ShieldCheck, HelpCircle, DollarSign, CheckCircle2, ArrowLeftRight, FileText, Table, Percent, RefreshCw } from 'lucide-react';
 
 interface RateConversionPageProps {
-  handleNavClick: (view: 'home' | 'about' | 'contact' | 'blog' | 'guide' | 'rate' | 'qbi' | 'benefits' | 'california' | 'texas' | 'newyork' | 'florida' | 'washington' | 'illinois' | 'georgia' | 'colorado' | 'software' | 'nurse' | 'realestate' | 'truck' | 'therapist' | 'consultant' | 'mixed' | 'estimated' | 'homeoffice' | 'healthins' | 'retirement' | 'misclassified' | 'w2or1099' | 'rateconv') => void;
+  handleNavClick: (view: 'home' | 'about' | 'contact' | 'blog' | 'guide' | 'rate' | 'qbi' | 'benefits' | 'california' | 'texas' | 'newyork' | 'florida' | 'washington' | 'illinois' | 'georgia' | 'colorado' | 'software' | 'nurse' | 'realestate' | 'truck' | 'therapist' | 'consultant' | 'mixed' | 'estimated' | 'homeoffice' | 'healthins' | 'retirement' | 'misclassified' | 'w2or1099' | 'rateconv' | 'deductions_checklist') => void;
 }
 
 const RateConversionPage: React.FC<RateConversionPageProps> = ({ handleNavClick }) => {
