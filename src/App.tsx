@@ -55,6 +55,7 @@ import MisclassificationPageView from './MisclassificationPage';
 import W2or1099DecisionPageView from './W2or1099DecisionPage';
 import RateConversionPageView from './RateConversionPage';
 import TaxDeductionsChecklistPageView from './TaxDeductionsChecklistPage';
+import ProsConsPageView from './ProsConsPage';
 
 // --- Constants & Data (Updated for 2026 Estimates) ---
 
@@ -250,14 +251,17 @@ const Accordion = ({ title, children, icon: Icon }: any) => {
 // --- Main App ---
 
 export default function App() {
-  const [currentView, setCurrentView] = useState<'home' | 'about' | 'contact' | 'blog' | 'guide' | 'rate' | 'qbi' | 'benefits' | 'california' | 'texas' | 'newyork' | 'florida' | 'washington' | 'illinois' | 'georgia' | 'colorado' | 'software' | 'nurse' | 'realestate' | 'truck' | 'therapist' | 'consultant' | 'mixed' | 'estimated' | 'homeoffice' | 'healthins' | 'retirement' | 'misclassified' | 'w2or1099' | 'rateconv' | 'deductions_checklist'>('home');
+  const [currentView, setCurrentView] = useState<'home' | 'about' | 'contact' | 'blog' | 'guide' | 'rate' | 'qbi' | 'benefits' | 'california' | 'texas' | 'newyork' | 'florida' | 'washington' | 'illinois' | 'georgia' | 'colorado' | 'software' | 'nurse' | 'realestate' | 'truck' | 'therapist' | 'consultant' | 'mixed' | 'estimated' | 'homeoffice' | 'healthins' | 'retirement' | 'misclassified' | 'w2or1099' | 'rateconv' | 'deductions_checklist' | 'proscons'>('home');
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   useEffect(() => {
     let title = "W2 vs 1099 Calculator | US Salary vs Contract Comparison";
     let description = "Calculate and compare your W2 salary vs 1099 contract income with our free US tax tool. Updated for 2026 tax year.";
 
-    if (currentView === 'deductions_checklist') {
+    if (currentView === 'proscons') {
+      title = "1099 vs W2: The Complete Pros and Cons List (From Someone Who's Done Both)";
+      description = "1099 vs W2 pros and cons. Discover an honest, narrative-driven comparison of being an independent contractor vs employee with real dollar examples, taxes, and a dynamic score tool.";
+    } else if (currentView === 'deductions_checklist') {
       title = "The Complete 1099 Tax Deductions Checklist for 2025: 21 Write-Offs Most Contractors Miss";
       description = "1099 tax deductions list 2025. Unlock our interactive checklist of 21 self-employed business deductions most contractors miss, with audit proof and estimated cash value calculations.";
     } else if (currentView === 'rateconv') {
@@ -546,6 +550,7 @@ export default function App() {
     { label: 'W2 vs 1099 Choice', view: 'w2or1099' as const },
     { label: 'Rate Conversion', view: 'rateconv' as const },
     { label: '1099 Deductions Checklist', view: 'deductions_checklist' as const },
+    { label: '1099 vs W2 Pros & Cons', view: 'proscons' as const },
     { label: 'CA Guide', view: 'california' as const },
     { label: 'TX Guide', view: 'texas' as const },
     { label: 'NY Guide', view: 'newyork' as const },
@@ -558,7 +563,7 @@ export default function App() {
     { label: 'Contact', view: 'contact' as const },
   ];
 
-  const handleNavClick = (view: 'home' | 'about' | 'contact' | 'blog' | 'guide' | 'rate' | 'qbi' | 'benefits' | 'california' | 'texas' | 'newyork' | 'florida' | 'washington' | 'illinois' | 'georgia' | 'colorado' | 'software' | 'nurse' | 'realestate' | 'truck' | 'therapist' | 'consultant' | 'mixed' | 'estimated' | 'homeoffice' | 'healthins' | 'retirement' | 'misclassified' | 'w2or1099' | 'rateconv' | 'deductions_checklist') => {
+  const handleNavClick = (view: 'home' | 'about' | 'contact' | 'blog' | 'guide' | 'rate' | 'qbi' | 'benefits' | 'california' | 'texas' | 'newyork' | 'florida' | 'washington' | 'illinois' | 'georgia' | 'colorado' | 'software' | 'nurse' | 'realestate' | 'truck' | 'therapist' | 'consultant' | 'mixed' | 'estimated' | 'homeoffice' | 'healthins' | 'retirement' | 'misclassified' | 'w2or1099' | 'rateconv' | 'deductions_checklist' | 'proscons') => {
     setCurrentView(view);
     setIsMenuOpen(false);
     window.scrollTo(0, 0);
@@ -1092,6 +1097,8 @@ export default function App() {
           <RateConversionPageView handleNavClick={handleNavClick} />
         ) : currentView === 'deductions_checklist' ? (
           <TaxDeductionsChecklistPageView handleNavClick={handleNavClick} />
+        ) : currentView === 'proscons' ? (
+          <ProsConsPageView handleNavClick={handleNavClick} />
         ) : currentView === 'about' ? (
           <AboutPageView />
         ) : (
